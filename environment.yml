@@ -1,0 +1,44 @@
+name: game-gen
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=conda_forge
+  - _openmp_mutex=4.5=2_gnu
+  - bzip2=1.0.8=h7f98852_4
+  - ca-certificates=2023.5.7=hbcca054_0
+  - ld_impl_linux-64=2.40=h41732ed_0
+  - libffi=3.4.2=h7f98852_5
+  - libgcc-ng=13.1.0=he5830b7_0
+  - libgomp=13.1.0=he5830b7_0
+  - libnsl=2.0.0=h7f98852_0
+  - libsqlite=3.42.0=h2797004_0
+  - libuuid=2.38.1=h0b41bf4_0
+  - libzlib=1.2.13=hd590300_5
+  - ncurses=6.4=hcb278e6_0
+  - openssl=3.1.1=hd590300_1
+  - pip=23.1.2=pyhd8ed1ab_0
+  - python=3.10.12=hd12c33a_0_cpython
+  - readline=8.2=h8228510_1
+  - setuptools=68.0.0=pyhd8ed1ab_0
+  - tk=8.6.12=h27826a3_0
+  - tzdata=2023c=h71feb2d_0
+  - wheel=0.40.0=pyhd8ed1ab_0
+  - xz=5.2.6=h166bdaf_0
+  - pip:
+    - arcade==2.6.17
+    - attrs==23.1.0
+    - certifi==2023.5.7
+    - cffi==1.15.1
+    - charset-normalizer==3.2.0
+    - idna==3.4
+    - numpy==1.25.0
+    - pillow==9.3.0
+    - pycparser==2.21
+    - pyglet==2.0.dev23
+    - pymunk==6.4.0
+    - pytiled-parser==2.2.0
+    - requests==2.31.0
+    - typing-extensions==4.7.1
+    - urllib3==2.0.3
+prefix: /home/vbanerjee/miniconda3/envs/game-gen
