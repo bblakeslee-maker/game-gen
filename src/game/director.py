@@ -16,7 +16,8 @@ class Director:
         self.state = GameState(story_teller=StoryTeller(use_cache=True))
 
 
-        game_flow = [PrologueController, CutsceneController, BattleController, CutsceneController]
+        # game_flow = [PrologueController, CutsceneController, BattleController, CutsceneController]
+        game_flow = [PrologueController, BattleController]
         self.scene_iter = iter(game_flow)
         self.current_scene = None
 
@@ -26,13 +27,14 @@ class Director:
         try:
             args = (self.state, callback)
             self.current_scene = next(self.scene_iter)(*args)
+            self.window.show_view(self.current_scene.view)
         except StopIteration:
             print("Game Over!")
-            self.window.close() # currently breaks because the views are all empty.
+            self.window.close()
             arcade.exit()
 
 
     def start_game(self):
         self.advance_game_flow()
-        self.window.show_view(self.current_scene.view)
+        
 
