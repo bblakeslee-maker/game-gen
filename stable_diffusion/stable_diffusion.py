@@ -55,7 +55,7 @@ class ImageGenerator:
             "steps": 5
         }
 
-        request_data = requests.post(url=f"http://127.0.0.1:7860/sdapi/v1/txt2img", json=payload)
+        request_data = requests.post(url=f"https://40a6211a09ejf93.gradio.app/sdapi/v1/txt2img", json=payload)
         request_data = request_data.json()
 
         pprint(request_data)
