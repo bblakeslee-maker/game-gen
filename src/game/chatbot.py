@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import argparse
 import dotenv
 import os
@@ -9,31 +11,24 @@ SYS_PROMPT = 'You are the narrator for an epic fantasy story.'
 
 
 class StoryTeller:
-    def __init__(self, cache):
-        self.cache = not cache
+    def __init__(self, use_cache):
+        self.use_cache = not use_cache
         self.BASE_PROMPT = 'Pretend you are the narrator of a video game.  Your job ' \
                            'is to generate plotlines for the story.'
         self.MODEL = 'gpt-3.5-turbo'
-        self.get_basic_character_info()
-        self.select_story_genre()
-        self.create_prologue()
-        self.create_main_character()
-        self.create_final_boss()
-        self.create_endings()
-        self.create_story_card_prompts()
-        self.create_title()
+
 
     def invoke_chatgpt(self, payload):
         response = openai.ChatCompletion.create(model=self.MODEL, messages=payload)
         return response.choices[0].message.content
 
-    def get_basic_character_info(self):
-        self.player_name = input('Enter a player name: ')
-        self.player_job = input('Enter the player job: ')
-        self.player_misc = input('Tell me anything extra about yourself: ')
+    def add_basic_character_info(self, name, occupation, extra_info):
+        self.player_name = name
+        self.player_job = occupation
+        self.player_misc = extra_info
 
     def select_story_genre(self):
-        if self.cache:
+        if self.use_cache:
             self.genre = 'Dark Comedy, Supernatural, Culinary'
         else:
             payload = [
@@ -46,7 +41,7 @@ class StoryTeller:
             self.genre = self.invoke_chatgpt(payload)
 
     def create_prologue(self):
-        if self.cache:
+        if self.use_cache:
             self.prologue = \
                 'In the dark and mysterious city of Ravenbrook, plagued by insatiable hunger and an ' \
                 'uncanny craving for blood, a most unlikely protagonist emerges. Bob, an eccentric ' \
@@ -69,7 +64,7 @@ class StoryTeller:
             self.prologue = self.invoke_chatgpt(payload)
 
     def create_main_character(self):
-        if self.cache:
+        if self.use_cache:
             self.main_character_description = \
                 'Bob is not your typical vampire. Unlike the brooding and dashing creatures of the ' \
                 'night often depicted in literature and films, Bob is a middle-aged, slightly ' \
@@ -112,7 +107,7 @@ class StoryTeller:
             self.main_character_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '')
 
     def create_final_boss(self):
-        if self.cache:
+        if self.use_cache:
             self.final_boss_description = \
                 'The final boss that Bob the Vampire must confront is a towering and formidable ' \
                 'figure known as Lord Vladimort, the Blood Moon Empress. Lord Vladimort is a ' \
@@ -163,7 +158,7 @@ class StoryTeller:
             self.final_boss_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '')
 
     def create_endings(self):
-        if self.cache:
+        if self.use_cache:
             self.epilogue_victory = \
                 'With his quick thinking, culinary expertise, and uncanny sense of humor, Bob ' \
                 'the Vampire chef manages to outwit Lord Vladimort, exploiting their weaknesses ' \
@@ -203,7 +198,7 @@ class StoryTeller:
             self.epilogue_defeat = self.invoke_chatgpt(payload)
 
     def create_story_card_prompts(self):
-        if self.cache:
+        if self.use_cache:
             self.prologue_card_prompt = \
                 'Dark city plagued by hunger\n' \
                 'Eccentric vampire chef\'s journey\n' \
@@ -250,7 +245,7 @@ class StoryTeller:
             self.epilogue_defeat_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '')
 
     def create_title(self):
-        if self.cache:
+        if self.use_cache:
             self.title = '"Fangs and Flambé: The Hilarious Adventures of Bob the Vampire Chef"'
         else:
             payload = [
@@ -264,12 +259,22 @@ def main():
     parser.add_argument('--use_chatgpt', required=False, action='store_true',
                         help='Set to enable ChatGPT interface.')
     args = parser.parse_args()
-    
-    with open(os.getenv('CHAT_GPT_KEY_FILE')) as f:
-        api_key = f.read().strip()
-    openai.api_key = api_key
+
+    openai.api_key = os.getenv('CHAT_GPT_KEY')
 
     storyteller = StoryTeller(args.use_chatgpt)
+
+    storyteller.add_basic_character_info("Bob", "Builder", "He can totally fix anything, except his marriage.")
+    storyteller.select_story_genre()
+    storyteller.create_prologue()
+    storyteller.create_main_character()
+    storyteller.create_final_boss()
+    storyteller.create_endings()
+    storyteller.create_story_card_prompts()
+    storyteller.create_title()
+
+
+
     print('Title: ', storyteller.title + '\n')
     print('Genre: ', storyteller.genre + '\n')
     print('Prologue: ', storyteller.prologue + '\n')

@@ -36,6 +36,7 @@ def main():
     director = Director(window)
     director.start_game()
 
+
     arcade.run()
 
 
