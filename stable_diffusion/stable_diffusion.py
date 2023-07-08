@@ -9,6 +9,7 @@ import numpy as np
 from PIL import Image
 import requests, io, base64
 from typing import List, Dict
+from pprint import pprint
 
 class Character:
     descriptors: List[str]
@@ -56,6 +57,8 @@ class ImageGenerator:
 
         request_data = requests.post(url=f"http://127.0.0.1:7860/sdapi/v1/txt2img", json=payload)
         request_data = request_data.json()
+
+        pprint(request_data)
 
         for i,img in enumerate(request_data['images']):
             image = Image.open(io.BytesIO(base64.b64decode(img.split(",",1)[0])))
