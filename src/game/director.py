@@ -4,7 +4,7 @@ from .scenes.cutscene import CutsceneController
 from .scenes.setup import SetupController
 from .game_types import GameState
 from .chatbot import StoryTeller
-
+from .stable_diffusion import ImageGenerator
 
 class Director:
     state: GameState
@@ -12,10 +12,26 @@ class Director:
 
     def __init__(self, window: arcade.Window):
         self.window = window
-        self.state = GameState(story_teller=StoryTeller(use_chatgpt=False), window_size=(800, 600), is_prologue=True, battle_won=False)
+        self.state = GameState(
+            story_teller=StoryTeller(use_chatgpt=False),
+            window_size=(800, 600),
+            is_prologue=True,
+            battle_won=False,
+            image_generator=ImageGenerator())
 
         # Should be retrieved from the SetupController
         self.state.story_teller.add_basic_character_info("Bob", "Builder", "He can totally fix anything, except his marriage.")
+
+        # Generate story
+        self.state.story_teller.generate_story()
+
+        # Create main character image
+        character_prompt = self.state.story_teller.main_character_prompt
+        self.state.image_generator.create_character('Bob', character_prompt)
+
+        # Create boss image
+        character_prompt = self.state.story_teller.final_boss_prompt
+        self.state.image_generator.create_character('Boss', character_prompt)
 
         # game_flow = [SetupController, CutsceneController, BattleController, CutsceneController]
         game_flow = [SetupController, CutsceneController, BattleController, CutsceneController]

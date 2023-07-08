@@ -3,7 +3,7 @@ from ..game_types import GameState
 from textwrap import wrap as wrap_text
 
 PLAYER_SCALING = 1.0
-BOSS_SCALING = 1.7
+BOSS_SCALING = 0.9
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
@@ -29,10 +29,11 @@ DESCRIPTIONS = {
 }
 
 class BattleView(arcade.View):
-    def __init__(self, is_done_callback):
+    def __init__(self, is_done_callback, state:GameState):
         super().__init__()
         self.done = is_done_callback
         self.time_elapsed = 0
+        self.state = state
         self.battle_done = False
         self.current_main_action_index = 0  # Initial main action index is 0 (Attack)
         self.current_subaction_index = 0  # Initial subaction index is 0 (first action under Attack)
@@ -44,13 +45,13 @@ class BattleView(arcade.View):
     def on_draw(self):
         self.clear()
 
-        player_image = ":resources:images/animated_characters/female_adventurer/femaleAdventurer_jump.png"
+        player_image = self.state.image_generator.get_portrait('Bob')
         self.player_sprite = arcade.Sprite(player_image, PLAYER_SCALING)
         self.player_sprite.center_x = 120
         self.player_sprite.center_y = 320
         self.player_sprite.draw()
 
-        enemy_image = ":resources:images/alien/alienBlue_jump.png"
+        enemy_image = self.state.image_generator.get_portrait('Boss')
         self.enemy_sprite = arcade.Sprite(enemy_image, BOSS_SCALING)
         self.enemy_sprite.texture.flipped_horizontally = True
         self.enemy_sprite.center_x = 620
@@ -133,4 +134,4 @@ class BattleController:
     def __init__(self, state: GameState, is_done_callback):
         print("BattleController")
         self.done = is_done_callback
-        self.view = BattleView(is_done_callback)
+        self.view = BattleView(is_done_callback, state)

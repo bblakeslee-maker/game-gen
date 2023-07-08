@@ -12,6 +12,7 @@ import io
 import base64
 from typing import List, Dict
 from tqdm import tqdm
+from pathlib import Path
 
 SD_SERVER_IP = '172.30.0.94'
 
@@ -28,15 +29,26 @@ class Character:
         descriptors,
         front_pose=None,
         back_pose=None,
-        negative_prompts=[],
-        attack_types=[],
-        attack_sprites=[],
+        negative_prompts=None,
+        attack_types=None,
+        attack_sprites=None,
+        cache:Path = Path('cache')
     ):
 
+        self.cache = cache
         self.descriptors = descriptors
         self.front_pose = front_pose
         self.back_pose = back_pose
         self.negative_prompts = negative_prompts
+
+        self.cache.mkdir(exist_ok=True, parents=True)
+
+        if negative_prompts is None:
+            negative_prompts = []
+        if attack_types is None:
+            attack_types = []
+        if attack_sprites is None:
+            attack_sprites = []
 
         for attack_type, attack_sprite in zip(attack_types, attack_sprites):
             self.attack_types[attack_type] = attack_sprite
@@ -52,7 +64,7 @@ class Character:
             self.attack_types[attack_type] = attack_sprite
 
 class ImageGenerator:
-    def __init__(self):
+    def __init__(self, cache:Path = Path('cache')):
         self.characters: Dict[str, Character] = {}
         self.negative_prompts = [
             'bad anatomy',
@@ -87,6 +99,12 @@ class ImageGenerator:
             'steps': 50
         }
 
+        self.cache = cache
+        self.cache.mkdir(exist_ok=True, parents=True)
+
+        for file in self.cache.glob('*.png'):
+            file.unlink()
+
         requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/options", json=override_settings)
 
     def create_character(self, name:str, description:str):
@@ -97,7 +115,10 @@ class ImageGenerator:
         else:
             self.characters[name] = Character(
                 descriptors = descriptors,
-                negative_prompts = self.negative_prompts)
+                negative_prompts = self.negative_prompts,
+                cache=self.cache)
+
+            self.get_portrait(name)
 
     def modify_character(self, name, description:str):
         descriptors = description.split(',')
@@ -164,6 +185,15 @@ class ImageGenerator:
 
         return images
 
+    def get_portrait(self, name:str)->str:
+        file_path = self.cache / f'{name}_portrait.png'
+
+        if not file_path.exists():
+            img = self.create_portrait(name)[0]
+            img.save(str(file_path))
+
+        return str(file_path)
+
     def create_portrait(self, name:str, no_bg:bool=False):
         if name not in self.characters:
             print(f'Character does not exist: {name}')
@@ -182,7 +212,7 @@ class ImageGenerator:
             'negative_prompt': neg_prompt,
             'steps': 50,
             'restore_faces': True,
-            'batch_size': 5,
+            'batch_size': 1,
             'denoising_strength': 0.7,
             'hr_upscaler': "Nearest"
         }
