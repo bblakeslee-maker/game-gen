@@ -1,4 +1,5 @@
 import arcade
+from textwrap import wrap as wrap_text
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -42,7 +43,6 @@ class BattleMenu(arcade.View):
         super().__init__()
         self.current_main_action_index = 0  # Initial main action index is 0 (Attack)
         self.current_subaction_index = 0  # Initial subaction index is 0 (first action under Attack)
-
         self.current_panel = 0  # Initial panel is 0 (main actions panel)
 
     def on_show(self):
@@ -51,24 +51,45 @@ class BattleMenu(arcade.View):
     def on_draw(self):
         arcade.start_render()
 
-        # Draw the panels
-        arcade.draw_rectangle_filled(SCREEN_WIDTH / 4, MENU_HEIGHT / 2, SCREEN_WIDTH / 4, MENU_HEIGHT, arcade.color.WHITE)  # Main action panel
-        arcade.draw_rectangle_filled(SCREEN_WIDTH / 2, MENU_HEIGHT / 2, SCREEN_WIDTH / 4, MENU_HEIGHT, arcade.color.LIGHT_GRAY)  # Subaction panel
-        arcade.draw_rectangle_filled(SCREEN_WIDTH * 3 / 4, MENU_HEIGHT / 2, SCREEN_WIDTH / 4, MENU_HEIGHT, arcade.color.GRAY)  # Description panel
+        # # Draw the panels
+        # arcade.draw_rectangle_filled(SCREEN_WIDTH / 4, MENU_HEIGHT / 2, SCREEN_WIDTH / 3, MENU_HEIGHT,
+        #                              arcade.color.WHITE)  # Main action panel
+        # arcade.draw_rectangle_filled(SCREEN_WIDTH / 2, MENU_HEIGHT / 2, SCREEN_WIDTH / 3, MENU_HEIGHT,
+        #                              arcade.color.LIGHT_GRAY)  # Subaction panel
+        # arcade.draw_rectangle_filled(SCREEN_WIDTH * 3 / 4, MENU_HEIGHT / 2, SCREEN_WIDTH / 3, MENU_HEIGHT,
+        #                              arcade.color.GRAY)  # Description panel
+
+        # Draw the panels with borders
+        BORDER_THICKNESS = 4  # border thickness in pixels
+        for i in range(3):
+            panel_x = SCREEN_WIDTH * (i * 2 + 1) / 6  # x position of the panel
+            # Draw the border (larger rectangle)
+            arcade.draw_rectangle_outline(panel_x, MENU_HEIGHT / 2, SCREEN_WIDTH / 3, MENU_HEIGHT, arcade.color.BLACK,
+                                          BORDER_THICKNESS)
+            # Draw the panel (smaller rectangle)
+            arcade.draw_rectangle_filled(panel_x, MENU_HEIGHT / 2, SCREEN_WIDTH / 3 - BORDER_THICKNESS,
+                                         MENU_HEIGHT - BORDER_THICKNESS, arcade.color.WHITE)
 
         # Draw the main action options
         for i, action in enumerate(MAIN_ACTIONS):
-            color = arcade.color.BLACK if action == self.current_main_action else arcade.color.DIM_GRAY
-            arcade.draw_text(action, SCREEN_WIDTH / 4 - 100, MENU_HEIGHT - (i + 1) * 30, color, font_size=20, anchor_x="center")
+            color = arcade.color.BLACK if i == self.current_main_action_index else arcade.color.DIM_GRAY
+            arcade.draw_text(action, SCREEN_WIDTH / 6 - 100, MENU_HEIGHT - (i + 1) * 30, color, font_size=20)
 
         # Draw the subaction options for the current main action
         for i, subaction in enumerate(SUBACTIONS[self.current_main_action]):
-            color = arcade.color.BLACK if subaction == self.current_subaction else arcade.color.DIM_GRAY
-            arcade.draw_text(subaction, SCREEN_WIDTH / 2 - 100, MENU_HEIGHT - (i + 1) * 30, color, font_size=20, anchor_x="center")
+            color = arcade.color.BLACK if i == self.current_subaction_index else arcade.color.DIM_GRAY
+            arcade.draw_text(subaction, SCREEN_WIDTH / 2 - 100, MENU_HEIGHT - (i + 1) * 30, color, font_size=20)
 
         # Draw the description for the current subaction
-        description = DESCRIPTIONS.get(self.current_subaction, "")
-        arcade.draw_text(description, SCREEN_WIDTH * 3 / 4 - 100, MENU_HEIGHT / 2, arcade.color.BLACK, font_size=20, anchor_x="center")
+        if self.current_subaction in DESCRIPTIONS:
+            description = DESCRIPTIONS.get(self.current_subaction, "")
+            lines = wrap_text(description, 10)
+            for i, line in enumerate(lines):
+                y = MENU_HEIGHT / 2 + (len(lines) / 2 - i) * 25  # Dynamically adjust y position based on how many lines there are
+                arcade.draw_text(line, SCREEN_WIDTH * 2 / 3 + 50, y, arcade.color.BLACK, font_size=20,
+                                 width=SCREEN_WIDTH / 4, align="left")
+                # arcade.draw_text(line, SCREEN_WIDTH * 2 / 3, MENU_HEIGHT / 2, arcade.color.BLACK, font_size=20)
+
 
     def on_key_press(self, key, modifiers):
         # If Up or Down arrow key is pressed
@@ -81,11 +102,16 @@ class BattleMenu(arcade.View):
             elif self.current_panel == 1:  # Subactions
                 self.current_subaction_index += 1 if key == arcade.key.DOWN else -1
                 # Wrap around if out of bounds
-                self.current_subaction_index %= len(SUBACTIONS[self.current_main_action_index])
+                self.current_subaction_index %= len(SUBACTIONS[self.current_main_action])
         # If Left or Right arrow key is pressed
         elif key in (arcade.key.LEFT, arcade.key.RIGHT):
-            # Change the current panel
-            self.current_panel += 1 if key == arcade.key.RIGHT else -1
+            # Change the current panel (if new panel is valid)
+            if self.current_panel == 0 and len(SUBACTIONS[self.current_main_action]) > 0:  # Main actions
+                self.current_panel += 1 if key == arcade.key.RIGHT else -1
+            elif self.current_panel == 1 and self.current_subaction in DESCRIPTIONS:  # Subactions
+                self.current_panel += 1 if key == arcade.key.RIGHT else -1
+            elif self.current_panel == 2:  # Description
+                self.current_panel += 1 if key == arcade.key.RIGHT else -1
             # Wrap around if out of bounds
             self.current_panel %= 3  # 3 panels total
 
