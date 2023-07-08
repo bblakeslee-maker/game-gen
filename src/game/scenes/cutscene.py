@@ -42,8 +42,8 @@ class CutsceneView(arcade.View):
         self.index = 0
 
         self.dialog_height = 100
-        self.portrait_width = 100
-        self.portrait_height = 100
+        self.portrait_width = 256
+        self.portrait_height = 256
 
         self.portrait_side = 0
 
@@ -57,6 +57,7 @@ class CutsceneView(arcade.View):
                                                    0,
                                                    self.width,
                                                    self.dialog_height)
+        self.dialog_section.set_callback(lambda: self.dialog_next())
 
         self.left_char_portrait_section = Portrait(0,
                                                    self.dialog_section.height,
@@ -89,6 +90,7 @@ class CutsceneView(arcade.View):
                 dialog = self.state.story_teller.epilogue_defeat_dialogue
 
         character_side = {}
+        character_portrait = {}
         side = 0
 
         events = []
@@ -97,18 +99,29 @@ class CutsceneView(arcade.View):
 
         for line in lines:
             character, text = line.split(': ', 1)
+
             if character not in character_side:
                 character_side[character] = side
                 side = 1 - side
 
+            if character not in character_portrait:
+                char_name = 'Bob' if character_side[character] == 0 else 'Boss'
+                portrait_texture = self.state.image_generator.get_portrait(char_name)
+                character_portrait[character] = arcade.load_texture(portrait_texture)
+
             events.append(CutsceneEvent(
                 [text],
-                dialog_box.Drawable(color = arcade.color.BLUE),
+                dialog_box.Drawable(texture = character_portrait[character]),
                 character_side[character],
                 dialog_box.Drawable(color = arcade.color.GREEN)
             ))
 
         self.open(events)
+
+    def dialog_next(self):
+        self.dialog_section.next()
+        if self.dialog_section.finished():
+            self.next()
 
     def open(self, events):
         self.events = events
@@ -158,9 +171,7 @@ class CutsceneView(arcade.View):
         pass
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
-        self.dialog_section.next()
-        if self.dialog_section.finished():
-            self.next()
+        self.dialog_next()
 
     def on_mouse_release(self, x: float, y: float, button: int, modifiers: int):
         pass

@@ -26,7 +26,12 @@ class DialogBox(arcade.Section):
         self.width = width
         self.height = height
 
+        self.callback = None
+
         self._char_index = 0
+
+    def set_callback(self, callback):
+        self.callback = callback
 
     def finished(self):
         return self.index == len(self.content)
@@ -40,16 +45,13 @@ class DialogBox(arcade.Section):
     def next(self):
         if self.is_open and self.finished():
             self.close()
-            return True
+            return
 
         text = self.content[self.index]
         print(self.content)
         if self._char_index == len(text):
             self.index += 1
             self._char_index = 0
-            return True
-
-        return False
 
     def close(self):
         self.is_open = False
@@ -65,3 +67,7 @@ class DialogBox(arcade.Section):
             text = self.content[self.index]
             self._char_index = min(self._char_index + 1, len(text))
             arcade.draw_text(text[:self._char_index], start_x, start_y, arcade.color.WHITE, 14, multiline=True, width=self.width - 2 * PADDING)
+
+    def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
+        if self.callback != None:
+            self.callback()
