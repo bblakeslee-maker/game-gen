@@ -152,6 +152,13 @@ class StoryTeller:
             ]
             temp = self.invoke_chatgpt(payload)
             self.main_character_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '')
+            payload = [
+                {'role': 'system', 'content': self.main_character_description},
+                {'role': 'user', 'content': f'Generate a list of four attacks that {self.player_name} uses.  '
+                                            f'Format it as a list of JSON objects, where each JSON object '
+                                            f'has "name", "damage", and "accuracy" keys.'}
+            ]
+            self.main_character_attacks = self.invoke_chatgpt(payload)
         else:
             self.main_character_description = \
                 'Bob is not your typical vampire. Unlike the brooding and dashing creatures of the ' \
@@ -180,6 +187,8 @@ class StoryTeller:
                 'Worn-out chef\'s coat tells tales\n' \
                 'Irreverent humor, unforgettable character'
 
+            self.main_character_attacks = None
+
     def create_final_boss(self):
         if self.use_chatgpt:
             payload = [
@@ -196,6 +205,13 @@ class StoryTeller:
             ]
             temp = self.invoke_chatgpt(payload)
             self.final_boss_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
+            payload = [
+                {'role': 'system', 'content': self.final_boss_description},
+                {'role': 'user', 'content': f'Generate a list of four attacks that the final boss uses.  '
+                                            f'Format it as a list of JSON objects, where each JSON object '
+                                            f'has "name", "damage", and "accuracy" keys.'}
+            ]
+            self.final_boss_attacks = self.invoke_chatgpt(payload)
         else:
             self.final_boss_description = \
                 'The final boss that Bob the Vampire must confront is a towering and formidable ' \
@@ -230,6 +246,8 @@ class StoryTeller:
                 'Shapeshifting form, ethereal and deadly\n' \
                 'Commanding bats, spirits of night\n' \
                 'Ultimate challenge in culinary supremacy'
+
+            self.final_boss_attacks = None
 
     def create_endings(self):
         if self.use_chatgpt:
@@ -358,8 +376,10 @@ def main():
     print('Prologue Prompt: \n' + storyteller.prologue_card_prompt + '\n')
     print('Main Character Description: \n' + storyteller.main_character_description + '\n')
     print('Main Character Prompt: \n' + storyteller.main_character_prompt + '\n')
+    print('Main Character Attacks: \n' + storyteller.main_character_attacks + '\n')
     print('Boss Description: \n' + storyteller.final_boss_description + '\n')
     print('Boss Prompt: \n' + storyteller.final_boss_prompt + '\n')
+    print('Boss Attacks: \n' + storyteller.final_boss_attacks + '\n')
     print('Epilogue Victory: \n' + storyteller.epilogue_victory + '\n')
     print('Epilogue Victory Dialogue: \n' + storyteller.epilogue_victory_dialogue + '\n')
     print('Epilogue Victory Prompt: \n' + storyteller.epilogue_victory_card_prompt + '\n')
