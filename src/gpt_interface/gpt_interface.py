@@ -15,6 +15,12 @@ class StoryTeller:
         self.get_basic_character_info()
         self.select_story_genre()
         self.create_prologue()
+        self.create_final_boss()
+        self.create_endings()
+
+    def invoke_chatgpt(self, payload):
+        response = openai.ChatCompletion.create(model=self.MODEL, messages=payload)
+        return response.choices[0].message.content
 
     def get_basic_character_info(self):
         self.player_name = input('Enter a player name: ')
@@ -30,19 +36,48 @@ class StoryTeller:
                         f'should be created?  Respond with a single word, '
                         f'like "fantasy" or "sci-fi"'}
         ]
-        response = openai.ChatCompletion.create(model=self.MODEL, messages=payload)
-        self.genre = response.choices[0].message.content
+        self.genre = self.invoke_chatgpt(payload)
 
     def create_prologue(self):
         payload = [
             {'role': 'system', 'content': self.BASE_PROMPT},
             {'role': 'user',
              'content': f'{self.player_name} is a {self.player_job} in a {self.genre} story.  '
-                        f'Write a prologue for the story.'}
+                        f'Write a single paragraph prologue for the story.'}
         ]
-        response = openai.ChatCompletion.create(model=self.MODEL, messages=payload)
-        self.prologue = response.choices[0].message.content
+        self.prologue = self.invoke_chatgpt(payload)
 
+    def create_final_boss(self):
+        payload = [
+            {'role': 'system', 'content': self.prologue},
+            {'role': 'user', 'content': f'Describe the appearance of a final boss that '
+                                        f'{self.player_name} the {self.player_job} '
+                                        f'needs to fight.  Describe it in five phrases,'
+                                        f'each five words or fewer.'}
+        ]
+        self.final_boss_description = self.invoke_chatgpt(payload)
+        payload = [
+            {'role': 'system', 'content': self.final_boss_description},
+            {'role': 'user', 'content': 'Describe this character in five phrases,'
+                                        'each five words or fewer.'}
+        ]
+        self.final_boss_prompt = self.invoke_chatgpt(payload)
+
+    def create_endings(self):
+        payload = [
+            {'role': 'system',
+             'content': self.BASE_PROMPT + ' ' + self.prologue + ' ' + self.final_boss_description},
+            {'role': 'user', 'content': f'Write a single paragraph ending for this story, '
+                                        f'assuming that {self.player_name} is victorious.'}
+        ]
+        self.epilogue_victory = self.invoke_chatgpt(payload)
+        payload = [
+            {'role': 'system',
+             'content': self.BASE_PROMPT + ' ' + self.prologue + ' ' + self.final_boss_description},
+            {'role': 'user', 'content': f'Write a single paragraph ending for this story, '
+                                        f'assuming that {self.player_name} loses the fight.'}
+        ]
+        self.epilogue_defeat = self.invoke_chatgpt(payload)
 
 def main():
     with open(os.getenv('CHAT_GPT_KEY_FILE')) as f:
@@ -50,8 +85,12 @@ def main():
     openai.api_key = api_key
 
     storyteller = StoryTeller()
-    print(storyteller.genre)
-    print(storyteller.prologue)
+    print('Genre: ', storyteller.genre)
+    print('Prologue: ', storyteller.prologue)
+    print('Boss Description: ', storyteller.final_boss_description)
+    print('Boss Prompt: ', storyteller.final_boss_prompt)
+    print('Epilogue Victory: ', storyteller.epilogue_victory)
+    print('Epilogue Defeat: ', storyteller.epilogue_defeat)
 
     '''
     payload = [{'role': 'user', 'content': 'Can you recite "lorem ipsum"?'}]
