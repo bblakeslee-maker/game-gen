@@ -1,5 +1,5 @@
 import arcade
-from ..types import GameState
+from ..game_types import GameState
 from textwrap import wrap as wrap_text
 
 PLAYER_SCALING = 1.0
@@ -134,6 +134,3 @@ class BattleController:
         print("BattleController")
         self.done = is_done_callback
         self.view = BattleView(is_done_callback)
-
-
-

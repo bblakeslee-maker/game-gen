@@ -1,5 +1,5 @@
 import arcade
-from ..types import GameState
+from ..game_types import GameState
 
 class PrologueView(arcade.View):
     def __init__(self, is_done_callback):
@@ -30,4 +30,3 @@ class PrologueController:
         print("PrologueController")
         self.done = is_done_callback
         self.view = PrologueView(is_done_callback)
-

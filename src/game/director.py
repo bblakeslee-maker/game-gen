@@ -2,7 +2,7 @@ import arcade
 from .scenes.battle import BattleController
 from .scenes.cutscene import CutsceneController
 from .scenes.prologue import PrologueController
-from .types import GameState
+from .game_types import GameState
 from .chatbot import StoryTeller
 
 
@@ -36,5 +36,3 @@ class Director:
 
     def start_game(self):
         self.advance_game_flow()
-
-

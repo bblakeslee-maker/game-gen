@@ -1,5 +1,5 @@
 import arcade
-from ..types import GameState
+from ..game_types import GameState
 
 import game.dialog_box as dialog_box
 
