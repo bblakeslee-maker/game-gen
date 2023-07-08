@@ -12,7 +12,7 @@ SYS_PROMPT = 'You are the narrator for an epic fantasy story.'
 
 class StoryTeller:
     def __init__(self, use_cache):
-        self.use_cache = not use_cache
+        self.use_cache = use_cache
         self.BASE_PROMPT = 'Pretend you are the narrator of a video game.  Your job ' \
                            'is to generate plotlines for the story.'
         self.MODEL = 'gpt-3.5-turbo'
