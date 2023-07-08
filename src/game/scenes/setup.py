@@ -1,7 +1,7 @@
 import arcade
 from ..game_types import GameState
 
-class PrologueView(arcade.View):
+class SetupView(arcade.View):
     def __init__(self, is_done_callback):
         super().__init__()
         self.done = is_done_callback
@@ -13,7 +13,7 @@ class PrologueView(arcade.View):
     def on_draw(self):
         self.clear()
         arcade.start_render()
-        arcade.draw_text("Prologue", 400, 300,
+        arcade.draw_text("Setup", 400, 300,
                          arcade.color.BLACK, font_size=30, anchor_x="center")
 
     def on_update(self, delta_time):
@@ -23,10 +23,10 @@ class PrologueView(arcade.View):
             self.done()
 
 
-class PrologueController:
-    view: PrologueView
+class SetupController:
+    view: SetupView
 
     def __init__(self, state: GameState, is_done_callback):
-        print("PrologueController")
+        print("SetupController")
         self.done = is_done_callback
-        self.view = PrologueView(is_done_callback)
+        self.view = SetupView(is_done_callback)

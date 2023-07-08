@@ -1,7 +1,7 @@
 import arcade
 from .scenes.battle import BattleController
 from .scenes.cutscene import CutsceneController
-from .scenes.prologue import PrologueController
+from .scenes.setup import SetupController
 from .game_types import GameState
 from .chatbot import StoryTeller
 
@@ -16,8 +16,8 @@ class Director:
         self.state = GameState(story_teller=StoryTeller(use_cache=True))
 
 
-        # game_flow = [PrologueController, CutsceneController, BattleController, CutsceneController]
-        game_flow = [PrologueController, CutsceneController, BattleController]
+        # game_flow = [SetupController, CutsceneController, BattleController, CutsceneController]
+        game_flow = [SetupController, CutsceneController, BattleController]
         self.scene_iter = iter(game_flow)
         self.current_scene = None
 
