@@ -11,8 +11,8 @@ SYS_PROMPT = 'You are the narrator for an epic fantasy story.'
 
 
 class StoryTeller:
-    def __init__(self, use_cache):
-        self.use_cache = use_cache
+    def __init__(self, use_chatgpt):
+        self.use_chatgpt = use_chatgpt
         self.BASE_PROMPT = 'Pretend you are the narrator of a video game.  Your job ' \
                            'is to generate plotlines for the story.'
         self.MODEL = 'gpt-3.5-turbo'
@@ -28,9 +28,7 @@ class StoryTeller:
         self.player_misc = extra_info
 
     def select_story_genre(self):
-        if self.use_cache:
-            self.genre = 'Dark Comedy, Supernatural, Culinary'
-        else:
+        if self.use_chatgpt:
             payload = [
                 {'role': 'user',
                  'content': f'Based on the character name {self.player_name}, '
@@ -39,9 +37,19 @@ class StoryTeller:
                             f'should be created?  Respond with a list of three single words.'}
             ]
             self.genre = self.invoke_chatgpt(payload)
+        else:
+            self.genre = 'Dark Comedy, Supernatural, Culinary'
 
     def create_prologue(self):
-        if self.use_cache:
+        if self.use_chatgpt:
+            payload = [
+                {'role': 'system', 'content': self.BASE_PROMPT},
+                {'role': 'user',
+                 'content': f'{self.player_name} is a {self.player_job} in a {self.genre} story.  '
+                            f'Write a single paragraph prologue for the story.'}
+            ]
+            self.prologue = self.invoke_chatgpt(payload)
+        else:
             self.prologue = \
                 'In the dark and mysterious city of Ravenbrook, plagued by insatiable hunger and an ' \
                 'uncanny craving for blood, a most unlikely protagonist emerges. Bob, an eccentric ' \
@@ -54,18 +62,17 @@ class StoryTeller:
                 'tale of dark comedy, supernatural absurdity, and mouthwatering dishes that will ' \
                 'leave even the most stoic souls in stitches. Welcome to Bob\'s world, where ' \
                 'culinary excellence meets the supernatural in a feast for the senses.'
-        else:
-            payload = [
-                {'role': 'system', 'content': self.BASE_PROMPT},
-                {'role': 'user',
-                 'content': f'{self.player_name} is a {self.player_job} in a {self.genre} story.  '
-                            f'Write a single paragraph prologue for the story.'}
-            ]
-            self.prologue = self.invoke_chatgpt(payload)
 
 
     def create_prologue_dialogue(self):
-        if self.cache:
+        if self.use_chatgpt:
+            payload = [
+                {'role': 'system', 'content': self.prologue},
+                {'role': 'user', 'content': f'Generate six lines of dialogue between {self.player_name} '
+                                            f'and the final boss from immediately before they begin to fight.'}
+            ]
+            self.prologue_dialogue = self.invoke_chatgpt(payload)
+        else:
             self.prologue_dialogue = \
                 'Vignoth: "So, this is where it all ends, in the heart of darkness itself."\n' \
                 'Final Boss: "Indeed, Vignoth, but you shall find no solace in defeating me."\n' \
@@ -74,17 +81,25 @@ class StoryTeller:
                 'Vignoth: "I\'m not afraid of darkness, I embrace it to bring light to this land."\n' \
                 'Final Boss: "Your arrogance will be your downfall, Vignoth. Prepare for oblivion!"\n' \
                 'Vignoth: "I have faced every challenge that came my way. You\'ll be no different, monster!"\n'
-        else:
-            payload = [
-                {'role': 'system', 'content': self.prologue},
-                {'role': 'user', 'content': f'Generate six lines of dialogue between {self.player_name} '
-                                            f'and the final boss from immediately before they begin to fight.'}
-            ]
-            self.prologue_dialogue = self.invoke_chatgpt(payload)
 
 
     def create_epilogue_dialogue(self):
-        if self.use_cache:
+        if self.use_chatgpt:
+            payload = [
+                {'role': 'system', 'content': self.epilogue_victory},
+                {'role': 'user', 'content': f'Generate six lines of dialogue between {self.player_name} '
+                                            f'and the final boss, after {self.player_name} defeats the final '
+                                            f'boss in combat.'}
+            ]
+            self.epilogue_victory_dialogue = self.invoke_chatgpt(payload)
+            payload = [
+                {'role': 'system', 'content': self.epilogue_defeat},
+                {'role': 'user', 'content': f'Generate six lines of dialogue between {self.player_name} '
+                                            f'and the final boss, after the final boss defeats {self.player_name} '
+                                            f'in combat.'}
+            ]
+            self.epilogue_defeat_dialogue = self.invoke_chatgpt(payload)
+        else:
             self.epilogue_victory_dialogue = \
                 'Vignoth: It\'s over, monster. Your reign of terror ends here.\n' \
                 'Monster: (Roaring defiantly) You may have bested me, but others like me will rise.\n' \
@@ -102,24 +117,23 @@ class StoryTeller:
                 'Vignoth: Even in defeat, I stand tall against the horrors you bring. Eldoria will remember my name, and your reign will crumble.\n' \
                 'Final Boss: Foolish mortal, your grand dreams mean nothing in the face of true power. Your legend will fade, and Eldoria will despair.\n' \
                 'Vignoth: The light will always prevail over darkness. Remember my words, for they shall haunt you as I return stronger, in spirit if not in body.'
-        else:
-            payload = [
-                {'role': 'system', 'content': self.epilogue_victory},
-                {'role': 'user', 'content': f'Generate six lines of dialogue between {self.player_name} '
-                                            f'and the final boss, after {self.player_name} defeats the final '
-                                            f'boss in combat.'}
-            ]
-            self.epilogue_victory_dialogue = self.invoke_chatgpt(payload)
-            payload = [
-                {'role': 'system', 'content': self.epilogue_defeat},
-                {'role': 'user', 'content': f'Generate six lines of dialogue between {self.player_name} '
-                                            f'and the final boss, after the final boss defeats {self.player_name} '
-                                            f'in combat.'}
-            ]
-            self.epilogue_defeat_dialogue = self.invoke_chatgpt(payload)
 
     def create_main_character(self):
-        if self.use_cache:
+        if self.use_chatgpt:
+            payload = [
+                {'role': 'system', 'content': self.prologue},
+                {'role': 'user', 'content': f'Describe the appearance of '
+                                            f'{self.player_name} the {self.player_job}.'}
+            ]
+            self.main_character_description = self.invoke_chatgpt(payload)
+            payload = [
+                {'role': 'system', 'content': self.main_character_description},
+                {'role': 'user', 'content': f'Describe the {self.player_job} in five phrases, '
+                                            f'each five words or fewer.'}
+            ]
+            temp = self.invoke_chatgpt(payload)
+            self.main_character_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '')
+        else:
             self.main_character_description = \
                 'Bob is not your typical vampire. Unlike the brooding and dashing creatures of the ' \
                 'night often depicted in literature and films, Bob is a middle-aged, slightly ' \
@@ -146,23 +160,24 @@ class StoryTeller:
                 'Crimson eyes twinkle mischievously\n' \
                 'Worn-out chef\'s coat tells tales\n' \
                 'Irreverent humor, unforgettable character'
-        else:
-            payload = [
-                {'role': 'system', 'content': self.prologue},
-                {'role': 'user', 'content': f'Describe the appearance of '
-                                            f'{self.player_name} the {self.player_job}.'}
-            ]
-            self.main_character_description = self.invoke_chatgpt(payload)
-            payload = [
-                {'role': 'system', 'content': self.main_character_description},
-                {'role': 'user', 'content': f'Describe the {self.player_job} in five phrases, '
-                                            f'each five words or fewer.'}
-            ]
-            temp = self.invoke_chatgpt(payload)
-            self.main_character_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '')
 
     def create_final_boss(self):
-        if self.use_cache:
+        if self.use_chatgpt:
+            payload = [
+                {'role': 'system', 'content': self.prologue},
+                {'role': 'user', 'content': f'Describe the appearance of a final boss that '
+                                            f'{self.player_name} the {self.player_job} '
+                                            f'needs to fight in one paragraph.'}
+            ]
+            self.final_boss_description = self.invoke_chatgpt(payload)
+            payload = [
+                {'role': 'system', 'content': self.final_boss_description},
+                {'role': 'user', 'content': 'Describe this character in five phrases, '
+                                            'each five words or fewer.'}
+            ]
+            temp = self.invoke_chatgpt(payload)
+            self.final_boss_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
+        else:
             self.final_boss_description = \
                 'The final boss that Bob the Vampire must confront is a towering and formidable ' \
                 'figure known as Lord Vladimort, the Blood Moon Empress. Lord Vladimort is a ' \
@@ -196,24 +211,24 @@ class StoryTeller:
                 'Shapeshifting form, ethereal and deadly\n' \
                 'Commanding bats, spirits of night\n' \
                 'Ultimate challenge in culinary supremacy'
-        else:
-            payload = [
-                {'role': 'system', 'content': self.prologue},
-                {'role': 'user', 'content': f'Describe the appearance of a final boss that '
-                                            f'{self.player_name} the {self.player_job} '
-                                            f'needs to fight in one paragraph.'}
-            ]
-            self.final_boss_description = self.invoke_chatgpt(payload)
-            payload = [
-                {'role': 'system', 'content': self.final_boss_description},
-                {'role': 'user', 'content': 'Describe this character in five phrases, '
-                                            'each five words or fewer.'}
-            ]
-            temp = self.invoke_chatgpt(payload)
-            self.final_boss_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
 
     def create_endings(self):
-        if self.use_cache:
+        if self.use_chatgpt:
+            payload = [
+                {'role': 'system',
+                 'content': self.BASE_PROMPT + ' ' + self.prologue + ' ' + self.final_boss_description},
+                {'role': 'user', 'content': f'Write a single paragraph ending for this story, '
+                                            f'assuming that {self.player_name} is victorious.'}
+            ]
+            self.epilogue_victory = self.invoke_chatgpt(payload)
+            payload = [
+                {'role': 'system',
+                 'content': self.BASE_PROMPT + ' ' + self.prologue + ' ' + self.final_boss_description},
+                {'role': 'user', 'content': f'Write a single paragraph ending for this story, '
+                                            f'assuming that {self.player_name} loses the fight.'}
+            ]
+            self.epilogue_defeat = self.invoke_chatgpt(payload)
+        else:
             self.epilogue_victory = \
                 'With his quick thinking, culinary expertise, and uncanny sense of humor, Bob ' \
                 'the Vampire chef manages to outwit Lord Vladimort, exploiting their weaknesses ' \
@@ -236,45 +251,9 @@ class StoryTeller:
                 'the dark streets of Ravenbrook. The city falls deeper into the shadows, under ' \
                 'the iron grip of Lord Vladimort\'s relentless reign, haunted by the memory of ' \
                 'that eccentric vampire chef who dared to challenge their authority.'
-        else:
-            payload = [
-                {'role': 'system',
-                 'content': self.BASE_PROMPT + ' ' + self.prologue + ' ' + self.final_boss_description},
-                {'role': 'user', 'content': f'Write a single paragraph ending for this story, '
-                                            f'assuming that {self.player_name} is victorious.'}
-            ]
-            self.epilogue_victory = self.invoke_chatgpt(payload)
-            payload = [
-                {'role': 'system',
-                 'content': self.BASE_PROMPT + ' ' + self.prologue + ' ' + self.final_boss_description},
-                {'role': 'user', 'content': f'Write a single paragraph ending for this story, '
-                                            f'assuming that {self.player_name} loses the fight.'}
-            ]
-            self.epilogue_defeat = self.invoke_chatgpt(payload)
 
     def create_story_card_prompts(self):
-        if self.use_cache:
-            self.prologue_card_prompt = \
-                'Dark city plagued by hunger\n' \
-                'Eccentric vampire chef\'s journey\n' \
-                'Horror and hilarity entwined\n' \
-                'Supernatural abilities and challenges\n' \
-                'Culinary excellence meets the supernatural'
-
-            self.epilogue_victory_card_prompt = \
-                'Bob outwits vampire lord\n' \
-                'Culinary triumph over evil\n' \
-                'Shadows yield extraordinary ingredients\n' \
-                'Blood Moon Empress defeated\n' \
-                'Ravenbrook transformed by immortal chef'
-
-            self.epilogue_defeat_card_prompt = \
-                'Culinary battle of epic proportions\n' \
-                'Bob\'s defenses crumble, weakened\n' \
-                'Blood Moon Empress revels victorious\n' \
-                'Whispered promise of eternal suffering\n' \
-                'City succumbs to Vladimort\'s reign'
-        else:
+        if self.use_chatgpt:
             payload = [
                 {'role': 'system', 'content': self.prologue},
                 {'role': 'user', 'content': 'Describe the scene depicted in this plot, in five phrases,'
@@ -298,16 +277,37 @@ class StoryTeller:
             ]
             temp = self.invoke_chatgpt(payload)
             self.epilogue_defeat_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
+        else:
+            self.prologue_card_prompt = \
+                'Dark city plagued by hunger\n' \
+                'Eccentric vampire chef\'s journey\n' \
+                'Horror and hilarity entwined\n' \
+                'Supernatural abilities and challenges\n' \
+                'Culinary excellence meets the supernatural'
+
+            self.epilogue_victory_card_prompt = \
+                'Bob outwits vampire lord\n' \
+                'Culinary triumph over evil\n' \
+                'Shadows yield extraordinary ingredients\n' \
+                'Blood Moon Empress defeated\n' \
+                'Ravenbrook transformed by immortal chef'
+
+            self.epilogue_defeat_card_prompt = \
+                'Culinary battle of epic proportions\n' \
+                'Bob\'s defenses crumble, weakened\n' \
+                'Blood Moon Empress revels victorious\n' \
+                'Whispered promise of eternal suffering\n' \
+                'City succumbs to Vladimort\'s reign'
 
     def create_title(self):
-        if self.use_cache:
-            self.title = '"Fangs and Flambé: The Hilarious Adventures of Bob the Vampire Chef"'
-        else:
+        if self.use_chatgpt:
             payload = [
                 {'role': 'system', 'content': self.prologue},
                 {'role': 'user', 'content': 'Create a title for this story.'}
             ]
             self.title = self.invoke_chatgpt(payload)
+        else:
+            self.title = '"Fangs and Flambé: The Hilarious Adventures of Bob the Vampire Chef"'
 
 def main():
     parser = argparse.ArgumentParser()
@@ -329,8 +329,6 @@ def main():
     storyteller.create_epilogue_dialogue()
     storyteller.create_story_card_prompts()
     storyteller.create_title()
-
-
 
     print('Title: \n', storyteller.title + '\n')
     print('Genre: \n', storyteller.genre + '\n')
