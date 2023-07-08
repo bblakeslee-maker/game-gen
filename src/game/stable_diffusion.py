@@ -153,7 +153,7 @@ class ImageGenerator:
         pos_prompt = self.characters[name].descriptors
         neg_prompt = self.characters[name].negative_prompts
 
-        pos_prompt = self.full_body_prompts + pos_prompt + ['plane background']
+        pos_prompt = self.full_body_prompts + pos_prompt + ['plain background']
         neg_prompt =  neg_prompt + ['missing torso', 'missing legs', 'missing arms', 'noisy background']
 
         pos_prompt = ','.join(pos_prompt)

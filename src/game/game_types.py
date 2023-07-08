@@ -10,3 +10,4 @@ class GameState:
     window_size: tuple[int, int]
     is_prologue: bool
     battle_won: bool
+    setup_results: dict[str, str] = dataclasses.field(default_factory=dict)

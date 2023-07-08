@@ -1,26 +1,93 @@
 import arcade
+import arcade.gui
 from ..game_types import GameState
 
+
+QUESTIONS = [
+    "Character Name:",
+    "Character Occupation:",
+    "Any Additional Info:"
+]
+
+
 class SetupView(arcade.View):
-    def __init__(self, is_done_callback):
+    def __init__(self, state: GameState, is_done_callback):
         super().__init__()
+        self.state = state
         self.done = is_done_callback
         self.time_elapsed = 0
 
-    def on_show_view(self):
-        arcade.set_background_color(arcade.color.WHITE)
+        self.manager = arcade.gui.UIManager()
+        self.manager.enable()
+
+        # Set background color
+        arcade.set_background_color((10,10,10))
+        self.v_box = arcade.gui.UIBoxLayout()
+        self.question_iter = iter(QUESTIONS)
+        self.question_widget = None
+
+
+
+        # # Create a text label
+        self.question_label = arcade.gui.UITextArea(
+                                            text=next(self.question_iter),
+                                            width=600,
+                                            height=40,
+                                            font_size=24,
+                                            font_name="Arial")
+        self.v_box.add(self.question_label)
+
+        # Create an entry box
+        text = ""
+        self.text_area = arcade.gui.UIInputText(text=text,
+                                           width=450,
+                                           height=100,
+                                           font_size=16,
+                                           font_name="Arial",
+                                           multiline=True)
+
+        bg_tex = arcade.load_texture(":resources:gui_basic_assets/window/grey_panel.png")
+        self.v_box.add(
+            arcade.gui.UITexturePane(
+                self.text_area.with_space_around(left=20),
+                tex=bg_tex,
+                padding=(20, 20, 20, 20)
+            )
+        )
+
+
+        # # Create a UITextureButton
+        texture = arcade.load_texture(":resources:onscreen_controls/flat_dark/play.png")
+        ui_texture_button = arcade.gui.UITextureButton(texture=texture)
+
+        # # Handle Clicks
+        @ui_texture_button.event("on_click")
+        def on_click_texture_button(event):
+
+            self.state.setup_results[self.question_label.text] = self.text_area.text
+            try:
+                self.question_label.text = next(self.question_iter)
+                self.text_area.text = ""
+            except StopIteration:
+                print(self.state.setup_results)
+                self.done()
+
+
+        #
+        self.v_box.add(ui_texture_button.with_space_around(top=20))
+        #
+        # # Create a widget to hold the v_box widget, that will center the buttons
+        self.manager.add(
+            arcade.gui.UIAnchorWidget(
+                anchor_x="center_x",
+                anchor_y="center_y",
+                child=self.v_box
+            )
+        )
 
     def on_draw(self):
         self.clear()
-        arcade.start_render()
-        arcade.draw_text("Setup", 400, 300,
-                         arcade.color.BLACK, font_size=30, anchor_x="center")
-
-    def on_update(self, delta_time):
-        self.time_elapsed += delta_time
-        print(self.time_elapsed)
-        if self.time_elapsed > 1.5:
-            self.done()
+        self.manager.draw()
 
 
 class SetupController:
@@ -29,4 +96,4 @@ class SetupController:
     def __init__(self, state: GameState, is_done_callback):
         print("SetupController")
         self.done = is_done_callback
-        self.view = SetupView(is_done_callback)
+        self.view = SetupView(state, is_done_callback)
