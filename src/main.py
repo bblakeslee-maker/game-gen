@@ -1,20 +1,19 @@
 import arcade
 import arcade.gui
 
-import dialog_box
-import cutscreen_view
+from game.director import Director
 
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-SCREEN_TITLE = "Dialog Box Example"
+WIDTH = 800
+HEIGHT = 600
 
 def main():
-    window = arcade.Window(resizable=False)
-    game = cutscreen_view.CutscreenView(SCREEN_WIDTH, SCREEN_HEIGHT)
+    """ Startup """
+    window = arcade.Window(WIDTH, HEIGHT, "GameGen")
 
-    window.show_view(game)
+    director = Director(window)
+    director.start_game()
 
-    window.run()
+    arcade.run()
 
 if __name__ == "__main__":
     main()

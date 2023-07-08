@@ -1,8 +1,9 @@
 import arcade
+from ..types import GameState
 
-import dialog_box
+import game.dialog_box as dialog_box
 
-class CutscreenEvent():
+class CutsceneEvent():
     def __init__(self, dialog, portrait, side, background):
         self.dialog = dialog
         self.portrait = portrait
@@ -29,15 +30,15 @@ class Portrait(arcade.Section):
             self.background.draw(self.left, self.bottom, self.width, self.height)
 
 
-class CutscreenView(arcade.View):
-    def __init__(self, width, height):
+class CutsceneView(arcade.View):
+    def __init__(self, width = 800, height = 600):
         super().__init__()
         self.width = width
         self.height = height
 
         self.content = \
-            [CutscreenEvent(["Hello", "world", "Very long line of text that demonstrates the single character per frame drawing."], dialog_box.Drawable(color = arcade.color.BLUE), 0, None),
-             CutscreenEvent(["Hello 2", "world 2"], dialog_box.Drawable(color = arcade.color.GREEN), 1, None)]
+            [CutsceneEvent(["Hello", "world", "Very long line of text that demonstrates the single character per frame drawing."], dialog_box.Drawable(color = arcade.color.BLUE), 0, None),
+             CutsceneEvent(["Hello 2", "world 2"], dialog_box.Drawable(color = arcade.color.GREEN), 1, None)]
         self.index = 0
 
         self.dialog_height = 100
@@ -125,3 +126,14 @@ class CutscreenView(arcade.View):
 
     def on_mouse_leave(self, x: float, y: float):
         pass
+
+
+class CutsceneController:
+    view: CutsceneView
+
+    def __init__(self, state: GameState, is_done_callback):
+        print("CutsceneController")
+        self.done = is_done_callback
+        self.view = CutsceneView()
+
+        self.done()
