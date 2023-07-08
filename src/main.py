@@ -9,6 +9,7 @@ HEIGHT = 600
 def main():
     """ Startup """
     window = arcade.Window(WIDTH, HEIGHT, "GameGen")
+    # window.setup()
 
     director = Director(window)
     director.start_game()
