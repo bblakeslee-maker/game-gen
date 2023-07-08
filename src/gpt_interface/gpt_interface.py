@@ -17,6 +17,8 @@ class StoryTeller:
         self.create_prologue()
         self.create_final_boss()
         self.create_endings()
+        self.create_story_card_prompts()
+        self.create_title()
 
     def invoke_chatgpt(self, payload):
         response = openai.ChatCompletion.create(model=self.MODEL, messages=payload)
@@ -78,18 +80,49 @@ class StoryTeller:
         ]
         self.epilogue_defeat = self.invoke_chatgpt(payload)
 
+    def create_story_card_prompts(self):
+        payload = [
+            {'role': 'system', 'content': self.prologue},
+            {'role': 'user', 'content': 'Describe the scene depicted in this plot, in five phrases,'
+                                        'each five words or less.'}
+        ]
+        self.prologue_card_prompt = self.invoke_chatgpt(payload)
+        payload = [
+            {'role': 'system', 'content': self.epilogue_victory},
+            {'role': 'user', 'content': 'Describe the scene depicted in this plot, in five phrases,'
+                                        'each five words or less.'}
+        ]
+        self.epilogue_victory_card_prompt = self.invoke_chatgpt(payload)
+        payload = [
+            {'role': 'system', 'content': self.epilogue_defeat},
+            {'role': 'user', 'content': 'Describe the scene depicted in this plot, in five phrases,'
+                                        'each five words or less.'}
+        ]
+        self.epilogue_defeat_card_prompt = self.invoke_chatgpt(payload)
+
+    def create_title(self):
+        payload = [
+            {'role': 'system', 'content': self.prologue},
+            {'role': 'user', 'content': 'Create a title for this story.'}
+        ]
+        self.title = self.invoke_chatgpt(payload)
+
 def main():
     with open(os.getenv('CHAT_GPT_KEY_FILE')) as f:
         api_key = f.read().strip()
     openai.api_key = api_key
 
     storyteller = StoryTeller()
-    print('Genre: ', storyteller.genre)
-    print('Prologue: ', storyteller.prologue)
-    print('Boss Description: ', storyteller.final_boss_description)
-    print('Boss Prompt: ', storyteller.final_boss_prompt)
-    print('Epilogue Victory: ', storyteller.epilogue_victory)
-    print('Epilogue Defeat: ', storyteller.epilogue_defeat)
+    print('Title: ', storyteller.title + '\n')
+    print('Genre: ', storyteller.genre + '\n')
+    print('Prologue: ', storyteller.prologue + '\n')
+    print('Prologue Prompt: ', storyteller.prologue_card_prompt + '\n')
+    print('Boss Description: ', storyteller.final_boss_description + '\n')
+    print('Boss Prompt: ', storyteller.final_boss_prompt + '\n')
+    print('Epilogue Victory: ', storyteller.epilogue_victory + '\n')
+    print('Epilogue Victory Prompt: ', storyteller.epilogue_victory_card_prompt + '\n')
+    print('Epilogue Defeat: ', storyteller.epilogue_defeat + '\n')
+    print('Epilogue Defeat Prompt: ', storyteller.epilogue_defeat_card_prompt + '\n')
 
     '''
     payload = [{'role': 'user', 'content': 'Can you recite "lorem ipsum"?'}]
