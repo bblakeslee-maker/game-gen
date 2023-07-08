@@ -63,6 +63,61 @@ class StoryTeller:
             ]
             self.prologue = self.invoke_chatgpt(payload)
 
+
+    def create_prologue_dialogue(self):
+        if self.cache:
+            self.prologue_dialogue = \
+                'Vignoth: "So, this is where it all ends, in the heart of darkness itself."\n' \
+                'Final Boss: "Indeed, Vignoth, but you shall find no solace in defeating me."\n' \
+                'Vignoth: "I\'ve faced creatures more powerful than you. You won\'t be an exception."\n' \
+                'Final Boss: "You underestimate the darkness that flows within me, hunter."\n' \
+                'Vignoth: "I\'m not afraid of darkness, I embrace it to bring light to this land."\n' \
+                'Final Boss: "Your arrogance will be your downfall, Vignoth. Prepare for oblivion!"\n' \
+                'Vignoth: "I have faced every challenge that came my way. You\'ll be no different, monster!"\n'
+        else:
+            payload = [
+                {'role': 'system', 'content': self.prologue},
+                {'role': 'user', 'content': f'Generate six lines of dialogue between {self.player_name} '
+                                            f'and the final boss from immediately before they begin to fight.'}
+            ]
+            self.prologue_dialogue = self.invoke_chatgpt(payload)
+
+
+    def create_epilogue_dialogue(self):
+        if self.use_cache:
+            self.epilogue_victory_dialogue = \
+                'Vignoth: It\'s over, monster. Your reign of terror ends here.\n' \
+                'Monster: (Roaring defiantly) You may have bested me, but others like me will rise.\n' \
+                'Vignoth: Not as long as I\'m here to protect Eldoria. Your kind will learn to fear the hunters.\n' \
+                'Monster: (Weakly) You can\'t stop the inevitable. Darkness will always find a way.\n' \
+                'Vignoth: Perhaps, but with each victory, the light grows stronger. Eldoria will never succumb to your darkness.\n' \
+                'Monster: (Whispering) You...cannot...escape...what lies...beyond...\n' \
+                'Vignoth: (Grim determination) I will face whatever challenges come, for the sake of Eldoria. Goodbye, monster. May your existence fade into nothingness.'
+
+            self.epilogue_defeat_dialogue = \
+                'Vignoth: You... cannot... win! Eldoria... will... prevail!\n' \
+                'Final Boss: (Laughs menacingly) Your feeble resistance ends here, Vignoth. The might of the behemoth will consume your world.\n' \
+                'Vignoth: I may fall today, but Eldoria\'s flame will never be extinguished. Others will rise in my place and vanquish you!\n' \
+                'Final Boss: Your bravado means nothing, hero. Your sacrifice will be in vain, as darkness descends upon your precious land.\n' \
+                'Vignoth: Even in defeat, I stand tall against the horrors you bring. Eldoria will remember my name, and your reign will crumble.\n' \
+                'Final Boss: Foolish mortal, your grand dreams mean nothing in the face of true power. Your legend will fade, and Eldoria will despair.\n' \
+                'Vignoth: The light will always prevail over darkness. Remember my words, for they shall haunt you as I return stronger, in spirit if not in body.'
+        else:
+            payload = [
+                {'role': 'system', 'content': self.epilogue_victory},
+                {'role': 'user', 'content': f'Generate six lines of dialogue between {self.player_name} '
+                                            f'and the final boss, after {self.player_name} defeats the final '
+                                            f'boss in combat.'}
+            ]
+            self.epilogue_victory_dialogue = self.invoke_chatgpt(payload)
+            payload = [
+                {'role': 'system', 'content': self.epilogue_defeat},
+                {'role': 'user', 'content': f'Generate six lines of dialogue between {self.player_name} '
+                                            f'and the final boss, after the final boss defeats {self.player_name} '
+                                            f'in combat.'}
+            ]
+            self.epilogue_defeat_dialogue = self.invoke_chatgpt(payload)
+
     def create_main_character(self):
         if self.use_cache:
             self.main_character_description = \
@@ -146,7 +201,7 @@ class StoryTeller:
                 {'role': 'system', 'content': self.prologue},
                 {'role': 'user', 'content': f'Describe the appearance of a final boss that '
                                             f'{self.player_name} the {self.player_job} '
-                                            f'needs to fight.'}
+                                            f'needs to fight in one paragraph.'}
             ]
             self.final_boss_description = self.invoke_chatgpt(payload)
             payload = [
@@ -155,7 +210,7 @@ class StoryTeller:
                                             'each five words or fewer.'}
             ]
             temp = self.invoke_chatgpt(payload)
-            self.final_boss_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '')
+            self.final_boss_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
 
     def create_endings(self):
         if self.use_cache:
@@ -226,7 +281,7 @@ class StoryTeller:
                                             'each five words or less.'}
             ]
             temp = self.invoke_chatgpt(payload)
-            self.prologue_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '')
+            self.prologue_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
 
             payload = [
                 {'role': 'system', 'content': self.epilogue_victory},
@@ -234,7 +289,7 @@ class StoryTeller:
                                             'each five words or less.'}
             ]
             temp = self.invoke_chatgpt(payload)
-            self.epilogue_victory_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '')
+            self.epilogue_victory_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
 
             payload = [
                 {'role': 'system', 'content': self.epilogue_defeat},
@@ -242,7 +297,7 @@ class StoryTeller:
                                             'each five words or less.'}
             ]
             temp = self.invoke_chatgpt(payload)
-            self.epilogue_defeat_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '')
+            self.epilogue_defeat_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
 
     def create_title(self):
         if self.use_cache:
@@ -267,26 +322,31 @@ def main():
     storyteller.add_basic_character_info("Bob", "Builder", "He can totally fix anything, except his marriage.")
     storyteller.select_story_genre()
     storyteller.create_prologue()
+    storyteller.create_prologue_dialogue()
     storyteller.create_main_character()
     storyteller.create_final_boss()
     storyteller.create_endings()
+    storyteller.create_epilogue_dialogue()
     storyteller.create_story_card_prompts()
     storyteller.create_title()
 
 
 
-    print('Title: ', storyteller.title + '\n')
-    print('Genre: ', storyteller.genre + '\n')
-    print('Prologue: ', storyteller.prologue + '\n')
-    print('Prologue Prompt: ', storyteller.prologue_card_prompt + '\n')
-    print('Main Character Description: ', storyteller.main_character_description + '\n')
-    print('Main Character Prompt: ', storyteller.main_character_prompt + '\n')
-    print('Boss Description: ', storyteller.final_boss_description + '\n')
-    print('Boss Prompt: ', storyteller.final_boss_prompt + '\n')
-    print('Epilogue Victory: ', storyteller.epilogue_victory + '\n')
-    print('Epilogue Victory Prompt: ', storyteller.epilogue_victory_card_prompt + '\n')
-    print('Epilogue Defeat: ', storyteller.epilogue_defeat + '\n')
-    print('Epilogue Defeat Prompt: ', storyteller.epilogue_defeat_card_prompt + '\n')
+    print('Title: \n', storyteller.title + '\n')
+    print('Genre: \n', storyteller.genre + '\n')
+    print('Prologue: \n', storyteller.prologue + '\n')
+    print('Prologue Dialogue: \n', storyteller.prologue_dialogue + '\n')
+    print('Prologue Prompt: \n', storyteller.prologue_card_prompt + '\n')
+    print('Main Character Description: \n', storyteller.main_character_description + '\n')
+    print('Main Character Prompt: \n', storyteller.main_character_prompt + '\n')
+    print('Boss Description: \n', storyteller.final_boss_description + '\n')
+    print('Boss Prompt: \n', storyteller.final_boss_prompt + '\n')
+    print('Epilogue Victory: \n', storyteller.epilogue_victory + '\n')
+    print('Epilogue Victory Dialogue: \n', storyteller.epilogue_victory_dialogue + '\n')
+    print('Epilogue Victory Prompt: \n', storyteller.epilogue_victory_card_prompt + '\n')
+    print('Epilogue Defeat: \n', storyteller.epilogue_defeat + '\n')
+    print('Epilogue Defeat Dialogue: \n', storyteller.epilogue_defeat_dialogue + '\n')
+    print('Epilogue Defeat Prompt: \n', storyteller.epilogue_defeat_card_prompt + '\n')
 
 
 if __name__ == '__main__':
