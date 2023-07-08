@@ -43,7 +43,7 @@ class BattleView(arcade.View):
 
     def on_draw(self):
         self.clear()
-    
+
         player_image = ":resources:images/animated_characters/female_adventurer/femaleAdventurer_jump.png"
         self.player_sprite = arcade.Sprite(player_image, PLAYER_SCALING)
         self.player_sprite.center_x = 120
