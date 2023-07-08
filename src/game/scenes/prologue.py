@@ -8,5 +8,9 @@ class PrologueController:
     view: PrologueView
 
     def __init__(self, is_done_callback):
-        super().__init__(is_done_callback)
+        print("PrologueController")
+        self.done = is_done_callback
+        self.view = PrologueView()
+
+        self.done()
 

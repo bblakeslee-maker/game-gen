@@ -1,7 +1,7 @@
 import arcade
-from scenes.battle import BattleController
-from scenes.cutscene import CutsceneController
-from scenes.prologue import PrologueController
+from .scenes.battle import BattleController
+from .scenes.cutscene import CutsceneController
+from .scenes.prologue import PrologueController
 
 
 
@@ -20,7 +20,8 @@ class Director:
             self.current_scene = next(self.scene_iter)(callback)
         except StopIteration:
             print("Game Over!")
-            # Stop the game
+            self.window.close() # currently breaks because the views are all empty.
+            arcade.exit()
 
 
     def start_game(self):
