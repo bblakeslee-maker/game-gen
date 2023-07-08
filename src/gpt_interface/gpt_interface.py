@@ -35,8 +35,7 @@ class StoryTeller:
              'content': f'Based on the character name {self.player_name}, '
                         f'their job {self.player_job}, and the additional '
                         f'information {self.player_misc}, what genre of story '
-                        f'should be created?  Respond with a single word, '
-                        f'like "fantasy" or "sci-fi"'}
+                        f'should be created?  Respond with a list of single words.'}
         ]
         self.genre = self.invoke_chatgpt(payload)
 
