@@ -264,10 +264,7 @@ def main():
     parser.add_argument('--use_chatgpt', required=False, action='store_true',
                         help='Set to enable ChatGPT interface.')
     args = parser.parse_args()
-    
-    with open(os.getenv('CHAT_GPT_KEY_FILE')) as f:
-        api_key = f.read().strip()
-    openai.api_key = api_key
+    openai.api_key = os.getenv('CHAT_GPT_KEY')
 
     storyteller = StoryTeller(args.use_chatgpt)
     print('Title: ', storyteller.title + '\n')
