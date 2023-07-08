@@ -7,10 +7,14 @@
 '''
 import numpy as np
 from PIL import Image
-import requests, io, base64
+import requests
+import io
+import base64
 from typing import List, Dict
-from pprint import pprint
 from tqdm import tqdm
+
+SD_SERVER_IP = '172.30.0.94'
+
 
 class Character:
     descriptors: List[str]
@@ -83,7 +87,7 @@ class ImageGenerator:
             'steps': 50
         }
 
-        requests.post(url=f"http://127.0.0.1:7860/sdapi/v1/options", json=override_settings)
+        requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/options", json=override_settings)
 
     def create_character(self, name:str, description:str):
         descriptors = description.split(',')
@@ -115,7 +119,7 @@ class ImageGenerator:
             "alpha_matting_erode_size": 10
         }
 
-        request_data = requests.post(url=f"http://127.0.0.1:7860/rembg", json=payload)
+        request_data = requests.post(url=f"http://{SD_SERVER_IP}:7860/rembg", json=payload)
         request_data = request_data.json()
 
         return request_data['image']
@@ -146,7 +150,7 @@ class ImageGenerator:
         }
 
         print('Generating images')
-        request_data = requests.post(url=f"http://127.0.0.1:7860/sdapi/v1/txt2img", json=payload)
+        request_data = requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/txt2img", json=payload)
         request_data = request_data.json()
 
         images = []
@@ -184,7 +188,7 @@ class ImageGenerator:
         }
 
         print('Generating images')
-        request_data = requests.post(url=f"http://127.0.0.1:7860/sdapi/v1/txt2img", json=payload)
+        request_data = requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/txt2img", json=payload)
         request_data = request_data.json()
 
         images = []
