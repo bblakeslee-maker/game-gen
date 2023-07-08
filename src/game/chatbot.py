@@ -205,6 +205,13 @@ class StoryTeller:
             ]
             temp = self.invoke_chatgpt(payload)
             self.final_boss_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
+            payload = [
+                {'role': 'system', 'content': self.final_boss_description},
+                {'role': 'user', 'content': f'Generate a list of four attacks that the final boss uses.  '
+                                            f'Format it as a list of JSON objects, where each JSON object '
+                                            f'has "name", "damage", and "accuracy" keys.'}
+            ]
+            self.final_boss_attacks = self.invoke_chatgpt(payload)
         else:
             self.final_boss_description = \
                 'The final boss that Bob the Vampire must confront is a towering and formidable ' \
@@ -239,6 +246,8 @@ class StoryTeller:
                 'Shapeshifting form, ethereal and deadly\n' \
                 'Commanding bats, spirits of night\n' \
                 'Ultimate challenge in culinary supremacy'
+
+            self.final_boss_attacks = None
 
     def create_endings(self):
         if self.use_chatgpt:
@@ -370,6 +379,7 @@ def main():
     print('Main Character Attacks: \n' + storyteller.main_character_attacks + '\n')
     print('Boss Description: \n' + storyteller.final_boss_description + '\n')
     print('Boss Prompt: \n' + storyteller.final_boss_prompt + '\n')
+    print('Boss Attacks: \n' + storyteller.final_boss_attacks + '\n')
     print('Epilogue Victory: \n' + storyteller.epilogue_victory + '\n')
     print('Epilogue Victory Dialogue: \n' + storyteller.epilogue_victory_dialogue + '\n')
     print('Epilogue Victory Prompt: \n' + storyteller.epilogue_victory_card_prompt + '\n')
