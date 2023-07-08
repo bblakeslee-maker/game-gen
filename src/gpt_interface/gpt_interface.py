@@ -52,8 +52,7 @@ class StoryTeller:
             {'role': 'system', 'content': self.prologue},
             {'role': 'user', 'content': f'Describe the appearance of a final boss that '
                                         f'{self.player_name} the {self.player_job} '
-                                        f'needs to fight.  Describe it in five phrases,'
-                                        f'each five words or fewer.'}
+                                        f'needs to fight.'}
         ]
         self.final_boss_description = self.invoke_chatgpt(payload)
         payload = [
