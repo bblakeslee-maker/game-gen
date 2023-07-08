@@ -34,6 +34,18 @@ class StoryTeller:
         self.player_job = occupation
         self.player_misc = extra_info
 
+    def generate_story(self):
+        self.select_story_genre()
+        self.create_prologue()
+        self.select_artistic_tone()
+        self.create_prologue_dialogue()
+        self.create_main_character()
+        self.create_final_boss()
+        self.create_endings()
+        self.create_epilogue_dialogue()
+        self.create_story_card_prompts()
+        self.create_title()
+
     def select_story_genre(self):
         if self.use_chatgpt:
             payload = [
@@ -79,7 +91,7 @@ class StoryTeller:
             ]
             self.tone = self.invoke_chatgpt(payload)
         else:
-            self.tone = None
+            self.tone = 'Whimsical, Colorful, Lighthearted'
 
 
     def create_prologue_dialogue(self):
@@ -187,7 +199,10 @@ class StoryTeller:
                 'Worn-out chef\'s coat tells tales\n' \
                 'Irreverent humor, unforgettable character'
 
-            self.main_character_attacks = None
+            self.main_character_attacks = '[{"name": "Hammer Slam","damage": 20,"accuracy": 90},' \
+                                          '{"name": "Saw Slash","damage": 15,"accuracy": 95},' \
+                                          '{"name": "Wrench Whack","damage": 10,"accuracy": 98},' \
+                                          '{"name": "Drill Drill","damage": 25,"accuracy": 85}]'
 
     def create_final_boss(self):
         if self.use_chatgpt:
@@ -247,7 +262,11 @@ class StoryTeller:
                 'Commanding bats, spirits of night\n' \
                 'Ultimate challenge in culinary supremacy'
 
-            self.final_boss_attacks = None
+            self.final_boss_attacks = '[{"name": "Steel Crusher","damage": 150,"accuracy": 80},' \
+                                      '{"name": "Rivet Rockets","damage": 100,"accuracy": 90},' \
+                                      '{"name": "Concrete Slam","damage": 120,"accuracy": 70},' \
+                                      '{"name": "Flaming Wrecking Ball","damage": 200,"accuracy": 60}]'
+
 
     def create_endings(self):
         if self.use_chatgpt:
@@ -357,16 +376,7 @@ def main():
     storyteller = StoryTeller(args.use_chatgpt)
 
     storyteller.add_basic_character_info("Bob", "Builder", "He can totally fix anything, except his marriage.")
-    storyteller.select_story_genre()
-    storyteller.create_prologue()
-    storyteller.select_artistic_tone()
-    storyteller.create_prologue_dialogue()
-    storyteller.create_main_character()
-    storyteller.create_final_boss()
-    storyteller.create_endings()
-    storyteller.create_epilogue_dialogue()
-    storyteller.create_story_card_prompts()
-    storyteller.create_title()
+    storyteller.generate_story()
 
     print('Title: \n' + storyteller.title + '\n')
     print('Genre: \n' + storyteller.genre + '\n')
