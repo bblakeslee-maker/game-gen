@@ -91,7 +91,7 @@ class StoryTeller:
             ]
             self.tone = self.invoke_chatgpt(payload)
         else:
-            self.tone = None
+            self.tone = 'Whimsical, Colorful, Lighthearted'
 
 
     def create_prologue_dialogue(self):
@@ -199,7 +199,10 @@ class StoryTeller:
                 'Worn-out chef\'s coat tells tales\n' \
                 'Irreverent humor, unforgettable character'
 
-            self.main_character_attacks = None
+            self.main_character_attacks = '[{"name": "Hammer Slam","damage": 20,"accuracy": 90},' \
+                                          '{"name": "Saw Slash","damage": 15,"accuracy": 95},' \
+                                          '{"name": "Wrench Whack","damage": 10,"accuracy": 98},' \
+                                          '{"name": "Drill Drill","damage": 25,"accuracy": 85}]'
 
     def create_final_boss(self):
         if self.use_chatgpt:
@@ -259,7 +262,11 @@ class StoryTeller:
                 'Commanding bats, spirits of night\n' \
                 'Ultimate challenge in culinary supremacy'
 
-            self.final_boss_attacks = None
+            self.final_boss_attacks = '[{"name": "Steel Crusher","damage": 150,"accuracy": 80},' \
+                                      '{"name": "Rivet Rockets","damage": 100,"accuracy": 90},' \
+                                      '{"name": "Concrete Slam","damage": 120,"accuracy": 70},' \
+                                      '{"name": "Flaming Wrecking Ball","damage": 200,"accuracy": 60}]'
+
 
     def create_endings(self):
         if self.use_chatgpt:
