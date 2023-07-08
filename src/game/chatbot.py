@@ -34,6 +34,18 @@ class StoryTeller:
         self.player_job = occupation
         self.player_misc = extra_info
 
+    def generate_story(self):
+        self.select_story_genre()
+        self.create_prologue()
+        self.select_artistic_tone()
+        self.create_prologue_dialogue()
+        self.create_main_character()
+        self.create_final_boss()
+        self.create_endings()
+        self.create_epilogue_dialogue()
+        self.create_story_card_prompts()
+        self.create_title()
+
     def select_story_genre(self):
         if self.use_chatgpt:
             payload = [
@@ -357,16 +369,7 @@ def main():
     storyteller = StoryTeller(args.use_chatgpt)
 
     storyteller.add_basic_character_info("Bob", "Builder", "He can totally fix anything, except his marriage.")
-    storyteller.select_story_genre()
-    storyteller.create_prologue()
-    storyteller.select_artistic_tone()
-    storyteller.create_prologue_dialogue()
-    storyteller.create_main_character()
-    storyteller.create_final_boss()
-    storyteller.create_endings()
-    storyteller.create_epilogue_dialogue()
-    storyteller.create_story_card_prompts()
-    storyteller.create_title()
+    storyteller.generate_story()
 
     print('Title: \n' + storyteller.title + '\n')
     print('Genre: \n' + storyteller.genre + '\n')
