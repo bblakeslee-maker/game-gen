@@ -1,105 +1,85 @@
-"""
-This program shows how to:
-  * Display a sequence of screens in your game.  The "arcade.View"
-    class makes it easy to separate the code for each screen into
-    its own class.
-  * This example shows the absolute basics of using "arcade.View".
-    See the "different_screens_example.py" for how to handle
-    screen-specific data.
-
-Make a separate class for each view (screen) in your game.
-The class will inherit from arcade.View. The structure will
-look like an arcade.Window as each View will need to have its own draw,
-update and window event methods. To switch a View, simply create a View
-with `view = MyView()` and then use the "self.window.set_view(view)" method.
-
-If Python and Arcade are installed, this example can be run from the command line with:
-python -m arcade.examples.view_screens_minimal
-"""
-
 import arcade
+import arcade.gui
+
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+SCREEN_TITLE = "Dialog Box Example"
+
+class Drawable():
+    def __init__(self, color=None, texture=None):
+        self.color = color
+        self.texture = texture
+
+    def draw(self, center_x, center_y, width, height):
+        if self.color:
+            arcade.draw_rectangle_filled(center_x, center_y, width, height, self.color)
+        elif self.texture:
+            arcade.draw_texture_rectangle(center_x, center_y, width, height, self.texture)
+        else:
+            raise ValueError('Either color or texture must be specified')
+
+class DialogBox():
+    def __init__(self, content, center_x, center_y, width, height):
+        self.is_open = False
+        self.content = content
+        self.index = 0
+
+        self.background = Drawable(color = arcade.color.RED)
+        self.center_x = center_x
+        self.center_y = center_y
+        self.width = width
+        self.height = height
+
+        self._char_index = 0
+
+    def open(self):
+        self.is_open = True
+
+    def next(self):
+        if self.index == len(self.content):
+            self.close()
+            return
+
+        text = self.content[self.index]
+        if self._char_index == len(text):
+            self.index += 1
+            self._char_index = 0
+
+    def close(self):
+        self.is_open = False
+
+    def draw(self):
+        FONT_SIZE = 14
+        PADDING = 4
+
+        start_y = self.center_y + self.height // 2 - FONT_SIZE - PADDING
+        start_x = self.center_x - self.width // 2 + PADDING
+        if self.index < len(self.content) and self.is_open:
+            self.background.draw(self.center_x, self.center_y, self.width, self.height)
+            text = self.content[self.index]
+            self._char_index = min(self._char_index + 1, len(text))
+            arcade.draw_text(text[:self._char_index], start_x, start_y, arcade.color.WHITE, 14, multiline=True, width=self.width)
 
 
-WIDTH = 800
-HEIGHT = 600
-
-
-class MenuView(arcade.View):
-    """ Class that manages the 'menu' view. """
-
-    def on_show_view(self):
-        """ Called when switching to this view"""
-        arcade.set_background_color(arcade.color.WHITE)
+class MyGame(arcade.Window):
+    def __init__(self, width, height, title):
+        super().__init__(width, height, title)
+        dialog_text = ["Hello", "Welcome to my Game where I show you the world that exists only in our minds or maybe in our hearts but that doesn't matter anymore."]
+        self.dialog_box = DialogBox(dialog_text, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, 600, 300)
+        self.dialog_box.background = Drawable(texture = arcade.load_texture("resource/dialog_box.png"))
+        self.dialog_box.open()
 
     def on_draw(self):
-        """ Draw the menu """
-        self.clear()
-        arcade.draw_text("Menu Screen - click to advance", WIDTH / 2, HEIGHT / 2,
-                         arcade.color.BLACK, font_size=30, anchor_x="center")
+        arcade.start_render()
+        self.dialog_box.draw()
 
     def on_mouse_press(self, _x, _y, _button, _modifiers):
-        """ Use a mouse press to advance to the 'game' view. """
-        game_view = GameView()
-        game_view.setup()
-        self.window.show_view(game_view)
-
-
-class GameView(arcade.View):
-    """ Manage the 'game' view for our program. """
-
-    def __init__(self):
-        super().__init__()
-        # Create variables here
-
-    def setup(self):
-        """ This should set up your game and get it ready to play """
-        # Replace 'pass' with the code to set up your game
-        pass
-
-    def on_show_view(self):
-        """ Called when switching to this view"""
-        arcade.set_background_color(arcade.color.ORANGE_PEEL)
-
-    def on_draw(self):
-        """ Draw everything for the game. """
-        self.clear()
-        arcade.draw_text("Game - press SPACE to advance", WIDTH / 2, HEIGHT / 2,
-                         arcade.color.BLACK, font_size=30, anchor_x="center")
-
-    def on_key_press(self, key, _modifiers):
-        """ Handle key presses. In this case, we'll just count a 'space' as
-        game over and advance to the game over view. """
-        if key == arcade.key.SPACE:
-            game_over_view = GameOverView()
-            self.window.show_view(game_over_view)
-
-
-class GameOverView(arcade.View):
-    """ Class to manage the game over view """
-    def on_show_view(self):
-        """ Called when switching to this view"""
-        arcade.set_background_color(arcade.color.BLACK)
-
-    def on_draw(self):
-        """ Draw the game over view """
-        self.clear()
-        arcade.draw_text("Game Over - press ESCAPE to advance", WIDTH / 2, HEIGHT / 2,
-                         arcade.color.WHITE, 30, anchor_x="center")
-
-    def on_key_press(self, key, _modifiers):
-        """ If user hits escape, go back to the main menu view """
-        if key == arcade.key.ESCAPE:
-            menu_view = MenuView()
-            self.window.show_view(menu_view)
+        self.dialog_box.next()
 
 
 def main():
-    """ Startup """
-    window = arcade.Window(WIDTH, HEIGHT, "Different Views Minimal Example")
-    menu_view = MenuView()
-    window.show_view(menu_view)
+    window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     arcade.run()
-
 
 if __name__ == "__main__":
     main()
