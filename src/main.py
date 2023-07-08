@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 This program shows how to:
   * Display a sequence of screens in your game.  The "arcade.View"
