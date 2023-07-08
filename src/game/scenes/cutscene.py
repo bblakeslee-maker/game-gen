@@ -31,15 +31,14 @@ class Portrait(arcade.Section):
 
 
 class CutsceneView(arcade.View):
-    def __init__(self, is_done_callback, width = 800, height = 600):
+    def __init__(self, state: GameState, is_done_callback):
         super().__init__()
+        self.state = state
         self.done = is_done_callback
-        self.width = width
-        self.height = height
+        self.width = state.window_size[0]
+        self.height = state.window_size[1]
 
-        self.content = \
-            [CutsceneEvent(["Hello", "world", "Very long line of text that demonstrates the single character per frame drawing."], dialog_box.Drawable(color = arcade.color.BLUE), 0, None),
-             CutsceneEvent(["Hello 2", "world 2"], dialog_box.Drawable(color = arcade.color.GREEN), 1, None)]
+        self.events = []
         self.index = 0
 
         self.dialog_height = 100
@@ -50,7 +49,7 @@ class CutsceneView(arcade.View):
 
         # Add sections for each of the areas:
         self.bg_section = arcade.Section(0,
-                                         height,
+                                         self.height,
                                          self.width,
                                          self.height - self.dialog_height)
 
@@ -74,36 +73,79 @@ class CutsceneView(arcade.View):
         self.section_manager.add_section(self.left_char_portrait_section)
         self.section_manager.add_section(self.right_char_portrait_section)
 
-        event = self.content[self.index]
-        self.dialog_section.open(event.dialog)
-        self.left_char_portrait_section.open(event.portrait)
+        self.get_events_from_state()
 
-    def set_content(self, content):
-        self.content = content
+    def get_events_from_state(self):
+        dialog = ""
+
+        if self.state.is_prologue:
+            self.state.story_teller.create_prologue_dialogue()
+            dialog = self.state.story_teller.prologue_dialogue
+        else:
+            self.state.story_teller.create_epilogue_dialogue()
+            if self.state.battle_won:
+                dialog = self.state.story_teller.epilogue_victory_dialogue
+            else:
+                dialog = self.state.story_teller.epilogue_defeat_dialogue
+
+        character_side = {}
+        side = 0
+
+        events = []
+
+        lines = dialog.strip().split('\n')
+
+        for line in lines:
+            character, text = line.split(': ', 1)
+            if character not in character_side:
+                character_side[character] = side
+                side = 1 - side
+
+            events.append(CutsceneEvent(
+                [text],
+                dialog_box.Drawable(color = arcade.color.BLUE),
+                character_side[character],
+                dialog_box.Drawable(color = arcade.color.GREEN)
+            ))
+
+        self.open(events)
+
+    def open(self, events):
+        self.events = events
         self.index = 0
 
-    def finished(self):
-        return self.index == len(self.content)
-
-    def next(self):
-        self.index = min(self.index + 1, len(self.content))
         if self.finished():
+            self.state.is_prologue = False
             self.done()
             return
 
-        event = self.content[self.index]
+        event = self.events[self.index]
+        self.trigger(event)
 
+    def finished(self):
+        return self.index == len(self.events)
+
+    def next(self):
+        self.index = min(self.index + 1, len(self.events))
+
+        if self.finished():
+            self.state.is_prologue = False
+            self.done()
+            return
+
+        event = self.events[self.index]
+        self.trigger(event)
+
+    def trigger(self, event: CutsceneEvent):
         self.dialog_section.close()
         self.dialog_section.open(event.dialog)
 
-        self.portrait_side = 1 - self.portrait_side
         self.left_char_portrait_section.close()
         self.right_char_portrait_section.close()
 
-        if self.portrait_side == 0:
+        if event.portrait_side == 0:
             self.left_char_portrait_section.open(event.portrait)
-
-        if self.portrait_side == 1:
+        else:
             self.right_char_portrait_section.open(event.portrait)
 
     def on_update(self, delta_time: float):
@@ -136,4 +178,4 @@ class CutsceneController:
     def __init__(self, state: GameState, is_done_callback):
         print("CutsceneController")
         self.done = is_done_callback
-        self.view = CutsceneView(is_done_callback)
+        self.view = CutsceneView(state, is_done_callback)

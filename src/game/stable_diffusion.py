@@ -12,8 +12,9 @@ import io
 import base64
 from typing import List, Dict
 from tqdm import tqdm
+from pathlib import Path
 
-SD_SERVER_IP = '127.0.0.1' #'172.30.0.94'
+SD_SERVER_IP = '172.30.0.94'
 
 
 class Character:
@@ -28,15 +29,26 @@ class Character:
         descriptors,
         front_pose=None,
         back_pose=None,
-        negative_prompts=[],
-        attack_types=[],
-        attack_sprites=[],
+        negative_prompts=None,
+        attack_types=None,
+        attack_sprites=None,
+        cache:Path = Path('cache')
     ):
 
+        self.cache = cache
         self.descriptors = descriptors
         self.front_pose = front_pose
         self.back_pose = back_pose
         self.negative_prompts = negative_prompts
+
+        self.cache.mkdir(exist_ok=True, parents=True)
+
+        if negative_prompts is None:
+            self.negative_prompts = []
+        if attack_types is None:
+            self.attack_types = []
+        if attack_sprites is None:
+            self.attack_sprites = []
 
         for attack_type, attack_sprite in zip(attack_types, attack_sprites):
             self.attack_types[attack_type] = attack_sprite
@@ -163,6 +175,15 @@ class ImageGenerator:
             images.append(img)
 
         return images
+
+    def get_portrait(self, name:str)->str:
+        file_path = self.cache / f'{name}_portrait.png'
+
+        if not file_path.exists():
+            img = self.create_portrait(name)
+            img.save(str(file_path))
+
+        return str(file_path)
 
     def create_portrait(self, name:str, no_bg:bool=False):
         if name not in self.characters:

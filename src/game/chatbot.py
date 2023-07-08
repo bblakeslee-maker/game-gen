@@ -15,6 +15,13 @@ class StoryTeller:
         self.use_chatgpt = use_chatgpt
         self.BASE_PROMPT = 'Pretend you are the narrator of a video game.  Your job ' \
                            'is to generate plotlines for the story.'
+        self.PROMPT_FORMATTING = 'Format the phrases as a list like this:' \
+                                 'set of words 1\n' \
+                                 'set of words 2\n' \
+                                 'until you generate enough phrases.'
+        self.DIALOG_FORMATTING = 'Format the dialog like this: \n' \
+                                 'name: line of dialogue\n' \
+                                 'until you generate enough dialogue.'
         self.MODEL = 'gpt-3.5-turbo'
 
 
@@ -63,13 +70,25 @@ class StoryTeller:
                 'leave even the most stoic souls in stitches. Welcome to Bob\'s world, where ' \
                 'culinary excellence meets the supernatural in a feast for the senses.'
 
+    def select_artistic_tone(self):
+        if self.use_chatgpt:
+            payload = [
+                {'role': 'system', 'content': self.prologue},
+                {'role': 'user',
+                 'content': 'Describe the visual artistic style and mood of the above story in 3 or 4 words.'}
+            ]
+            self.tone = self.invoke_chatgpt(payload)
+        else:
+            self.tone = None
+
 
     def create_prologue_dialogue(self):
         if self.use_chatgpt:
             payload = [
                 {'role': 'system', 'content': self.prologue},
                 {'role': 'user', 'content': f'Generate six lines of dialogue between {self.player_name} '
-                                            f'and the final boss from immediately before they begin to fight.'}
+                                            f'and the final boss from immediately before they begin to fight.  ' +
+                                            self.DIALOG_FORMATTING}
             ]
             self.prologue_dialogue = self.invoke_chatgpt(payload)
         else:
@@ -89,14 +108,14 @@ class StoryTeller:
                 {'role': 'system', 'content': self.epilogue_victory},
                 {'role': 'user', 'content': f'Generate six lines of dialogue between {self.player_name} '
                                             f'and the final boss, after {self.player_name} defeats the final '
-                                            f'boss in combat.'}
+                                            f'boss in combat.  ' + self.DIALOG_FORMATTING}
             ]
             self.epilogue_victory_dialogue = self.invoke_chatgpt(payload)
             payload = [
                 {'role': 'system', 'content': self.epilogue_defeat},
                 {'role': 'user', 'content': f'Generate six lines of dialogue between {self.player_name} '
                                             f'and the final boss, after the final boss defeats {self.player_name} '
-                                            f'in combat.'}
+                                            f'in combat.  ' + self.DIALOG_FORMATTING}
             ]
             self.epilogue_defeat_dialogue = self.invoke_chatgpt(payload)
         else:
@@ -129,10 +148,17 @@ class StoryTeller:
             payload = [
                 {'role': 'system', 'content': self.main_character_description},
                 {'role': 'user', 'content': f'Describe the {self.player_job} in five phrases, '
-                                            f'each five words or fewer.'}
+                                            f'each five words or fewer.  ' + self.PROMPT_FORMATTING}
             ]
             temp = self.invoke_chatgpt(payload)
             self.main_character_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '')
+            payload = [
+                {'role': 'system', 'content': self.main_character_description},
+                {'role': 'user', 'content': f'Generate a list of four attacks that {self.player_name} uses.  '
+                                            f'Format it as a list of JSON objects, where each JSON object '
+                                            f'has "name", "damage", and "accuracy" keys.'}
+            ]
+            self.main_character_attacks = self.invoke_chatgpt(payload)
         else:
             self.main_character_description = \
                 'Bob is not your typical vampire. Unlike the brooding and dashing creatures of the ' \
@@ -161,6 +187,8 @@ class StoryTeller:
                 'Worn-out chef\'s coat tells tales\n' \
                 'Irreverent humor, unforgettable character'
 
+            self.main_character_attacks = None
+
     def create_final_boss(self):
         if self.use_chatgpt:
             payload = [
@@ -173,10 +201,17 @@ class StoryTeller:
             payload = [
                 {'role': 'system', 'content': self.final_boss_description},
                 {'role': 'user', 'content': 'Describe this character in five phrases, '
-                                            'each five words or fewer.'}
+                                            'each five words or fewer.  ' + self.PROMPT_FORMATTING}
             ]
             temp = self.invoke_chatgpt(payload)
             self.final_boss_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
+            payload = [
+                {'role': 'system', 'content': self.final_boss_description},
+                {'role': 'user', 'content': f'Generate a list of four attacks that the final boss uses.  '
+                                            f'Format it as a list of JSON objects, where each JSON object '
+                                            f'has "name", "damage", and "accuracy" keys.'}
+            ]
+            self.final_boss_attacks = self.invoke_chatgpt(payload)
         else:
             self.final_boss_description = \
                 'The final boss that Bob the Vampire must confront is a towering and formidable ' \
@@ -211,6 +246,8 @@ class StoryTeller:
                 'Shapeshifting form, ethereal and deadly\n' \
                 'Commanding bats, spirits of night\n' \
                 'Ultimate challenge in culinary supremacy'
+
+            self.final_boss_attacks = None
 
     def create_endings(self):
         if self.use_chatgpt:
@@ -257,7 +294,7 @@ class StoryTeller:
             payload = [
                 {'role': 'system', 'content': self.prologue},
                 {'role': 'user', 'content': 'Describe the scene depicted in this plot, in five phrases,'
-                                            'each five words or less.'}
+                                            'each five words or less.  ' + self.PROMPT_FORMATTING}
             ]
             temp = self.invoke_chatgpt(payload)
             self.prologue_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
@@ -265,7 +302,7 @@ class StoryTeller:
             payload = [
                 {'role': 'system', 'content': self.epilogue_victory},
                 {'role': 'user', 'content': 'Describe the scene depicted in this plot, in five phrases,'
-                                            'each five words or less.'}
+                                            'each five words or less.  ' + self.PROMPT_FORMATTING}
             ]
             temp = self.invoke_chatgpt(payload)
             self.epilogue_victory_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
@@ -273,7 +310,7 @@ class StoryTeller:
             payload = [
                 {'role': 'system', 'content': self.epilogue_defeat},
                 {'role': 'user', 'content': 'Describe the scene depicted in this plot, in five phrases,'
-                                            'each five words or less.'}
+                                            'each five words or less.  ' + self.PROMPT_FORMATTING}
             ]
             temp = self.invoke_chatgpt(payload)
             self.epilogue_defeat_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
@@ -322,6 +359,7 @@ def main():
     storyteller.add_basic_character_info("Bob", "Builder", "He can totally fix anything, except his marriage.")
     storyteller.select_story_genre()
     storyteller.create_prologue()
+    storyteller.select_artistic_tone()
     storyteller.create_prologue_dialogue()
     storyteller.create_main_character()
     storyteller.create_final_boss()
@@ -330,21 +368,24 @@ def main():
     storyteller.create_story_card_prompts()
     storyteller.create_title()
 
-    print('Title: \n', storyteller.title + '\n')
-    print('Genre: \n', storyteller.genre + '\n')
-    print('Prologue: \n', storyteller.prologue + '\n')
-    print('Prologue Dialogue: \n', storyteller.prologue_dialogue + '\n')
-    print('Prologue Prompt: \n', storyteller.prologue_card_prompt + '\n')
-    print('Main Character Description: \n', storyteller.main_character_description + '\n')
-    print('Main Character Prompt: \n', storyteller.main_character_prompt + '\n')
-    print('Boss Description: \n', storyteller.final_boss_description + '\n')
-    print('Boss Prompt: \n', storyteller.final_boss_prompt + '\n')
-    print('Epilogue Victory: \n', storyteller.epilogue_victory + '\n')
-    print('Epilogue Victory Dialogue: \n', storyteller.epilogue_victory_dialogue + '\n')
-    print('Epilogue Victory Prompt: \n', storyteller.epilogue_victory_card_prompt + '\n')
-    print('Epilogue Defeat: \n', storyteller.epilogue_defeat + '\n')
-    print('Epilogue Defeat Dialogue: \n', storyteller.epilogue_defeat_dialogue + '\n')
-    print('Epilogue Defeat Prompt: \n', storyteller.epilogue_defeat_card_prompt + '\n')
+    print('Title: \n' + storyteller.title + '\n')
+    print('Genre: \n' + storyteller.genre + '\n')
+    print('Tone: \n' + storyteller.tone + '\n')
+    print('Prologue: \n' + storyteller.prologue + '\n')
+    print('Prologue Dialogue: \n' + storyteller.prologue_dialogue + '\n')
+    print('Prologue Prompt: \n' + storyteller.prologue_card_prompt + '\n')
+    print('Main Character Description: \n' + storyteller.main_character_description + '\n')
+    print('Main Character Prompt: \n' + storyteller.main_character_prompt + '\n')
+    print('Main Character Attacks: \n' + storyteller.main_character_attacks + '\n')
+    print('Boss Description: \n' + storyteller.final_boss_description + '\n')
+    print('Boss Prompt: \n' + storyteller.final_boss_prompt + '\n')
+    print('Boss Attacks: \n' + storyteller.final_boss_attacks + '\n')
+    print('Epilogue Victory: \n' + storyteller.epilogue_victory + '\n')
+    print('Epilogue Victory Dialogue: \n' + storyteller.epilogue_victory_dialogue + '\n')
+    print('Epilogue Victory Prompt: \n' + storyteller.epilogue_victory_card_prompt + '\n')
+    print('Epilogue Defeat: \n' + storyteller.epilogue_defeat + '\n')
+    print('Epilogue Defeat Dialogue: \n' + storyteller.epilogue_defeat_dialogue + '\n')
+    print('Epilogue Defeat Prompt: \n' + storyteller.epilogue_defeat_card_prompt + '\n')
 
 
 if __name__ == '__main__':
