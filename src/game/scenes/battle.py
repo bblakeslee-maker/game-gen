@@ -3,7 +3,7 @@ from ..game_types import GameState
 from textwrap import wrap as wrap_text
 
 PLAYER_SCALING = 1.0
-BOSS_SCALING = 1.7
+BOSS_SCALING = 0.9
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 

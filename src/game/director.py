@@ -22,6 +22,9 @@ class Director:
         # Should be retrieved from the SetupController
         self.state.story_teller.add_basic_character_info("Bob", "Builder", "He can totally fix anything, except his marriage.")
 
+        # Generate story
+        self.state.story_teller.generate_story()
+
         # Create main character image
         character_prompt = self.state.story_teller.main_character_prompt
         self.state.image_generator.create_character('Bob', character_prompt)
