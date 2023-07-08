@@ -29,7 +29,7 @@ DESCRIPTIONS = {
 }
 
 class BattleView(arcade.View):
-    def __init__(self, is_done_callback, state:GameState):
+    def __init__(self, state, is_done_callback):
         super().__init__()
         self.done = is_done_callback
         self.time_elapsed = 0
@@ -134,4 +134,4 @@ class BattleController:
     def __init__(self, state: GameState, is_done_callback):
         print("BattleController")
         self.done = is_done_callback
-        self.view = BattleView(is_done_callback, state)
+        self.view = BattleView(state, is_done_callback)
