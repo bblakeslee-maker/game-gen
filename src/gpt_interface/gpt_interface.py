@@ -15,6 +15,7 @@ class StoryTeller:
         self.get_basic_character_info()
         self.select_story_genre()
         self.create_prologue()
+        self.create_main_character()
         self.create_final_boss()
         self.create_endings()
         self.create_story_card_prompts()
@@ -35,7 +36,7 @@ class StoryTeller:
              'content': f'Based on the character name {self.player_name}, '
                         f'their job {self.player_job}, and the additional '
                         f'information {self.player_misc}, what genre of story '
-                        f'should be created?  Respond with a list of single words.'}
+                        f'should be created?  Respond with a list of three single words.'}
         ]
         self.genre = self.invoke_chatgpt(payload)
 
@@ -48,6 +49,21 @@ class StoryTeller:
         ]
         self.prologue = self.invoke_chatgpt(payload)
 
+    def create_main_character(self):
+        payload = [
+            {'role': 'system', 'content': self.prologue},
+            {'role': 'user', 'content': f'Describe the appearance of '
+                                        f'{self.player_name} the {self.player_job}.'}
+        ]
+        self.main_character_description = self.invoke_chatgpt(payload)
+        payload = [
+            {'role': 'system', 'content': self.main_character_description},
+            {'role': 'user', 'content': f'Describe the {self.player_job} in five phrases, '
+                                        f'each five words or fewer.'}
+        ]
+        temp = self.invoke_chatgpt(payload)
+        self.main_character_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '')
+
     def create_final_boss(self):
         payload = [
             {'role': 'system', 'content': self.prologue},
@@ -58,10 +74,11 @@ class StoryTeller:
         self.final_boss_description = self.invoke_chatgpt(payload)
         payload = [
             {'role': 'system', 'content': self.final_boss_description},
-            {'role': 'user', 'content': 'Describe this character in five phrases,'
+            {'role': 'user', 'content': 'Describe this character in five phrases, '
                                         'each five words or fewer.'}
         ]
-        self.final_boss_prompt = self.invoke_chatgpt(payload)
+        temp = self.invoke_chatgpt(payload)
+        self.final_boss_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '')
 
     def create_endings(self):
         payload = [
@@ -85,19 +102,24 @@ class StoryTeller:
             {'role': 'user', 'content': 'Describe the scene depicted in this plot, in five phrases,'
                                         'each five words or less.'}
         ]
-        self.prologue_card_prompt = self.invoke_chatgpt(payload)
+        temp = self.invoke_chatgpt(payload)
+        self.prologue_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '')
+
         payload = [
             {'role': 'system', 'content': self.epilogue_victory},
             {'role': 'user', 'content': 'Describe the scene depicted in this plot, in five phrases,'
                                         'each five words or less.'}
         ]
-        self.epilogue_victory_card_prompt = self.invoke_chatgpt(payload)
+        temp = self.invoke_chatgpt(payload)
+        self.epilogue_victory_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '')
+
         payload = [
             {'role': 'system', 'content': self.epilogue_defeat},
             {'role': 'user', 'content': 'Describe the scene depicted in this plot, in five phrases,'
                                         'each five words or less.'}
         ]
-        self.epilogue_defeat_card_prompt = self.invoke_chatgpt(payload)
+        temp = self.invoke_chatgpt(payload)
+        self.epilogue_defeat_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '')
 
     def create_title(self):
         payload = [
@@ -116,6 +138,8 @@ def main():
     print('Genre: ', storyteller.genre + '\n')
     print('Prologue: ', storyteller.prologue + '\n')
     print('Prologue Prompt: ', storyteller.prologue_card_prompt + '\n')
+    print('Main Character Description: ', storyteller.main_character_description + '\n')
+    print('Main Character Prompt: ', storyteller.main_character_prompt + '\n')
     print('Boss Description: ', storyteller.final_boss_description + '\n')
     print('Boss Prompt: ', storyteller.final_boss_prompt + '\n')
     print('Epilogue Victory: ', storyteller.epilogue_victory + '\n')
