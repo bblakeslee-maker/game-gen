@@ -6,6 +6,8 @@
     - Store the character description, negative prompts, T pose (front and back), and attack types
 '''
 import numpy as np
+from PIL import Image
+import requests, io, base64
 from typing import List, Dict
 
 class Character:
@@ -45,4 +47,24 @@ class Character:
 
 class ImageGenerator:
     characters: List[Character]
-    
+
+    def create_image(self, prompt:str):
+        payload = {
+            "prompt": prompt,
+            "steps": 5
+        }
+
+        request_data = requests.post(url=f"http://127.0.0.1:7860/sdapi/v1/txt2img", json=payload)
+        request_data = request_data.json()
+
+        for i,img in enumerate(request_data['images']):
+            image = Image.open(io.BytesIO(base64.b64decode(img.split(",",1)[0])))
+
+            image.save(f'img{i}.png')
+
+
+if __name__ == '__main__':
+    prompt = 'Sun-kissed skin, weathered by sun, Calloused hands, testament to toil, Strong physique, built for labor, Rugged face, etched with determination, Deep-set eyes, filled with wisdom, Humble attire, clothes of simplicity, Earth-stained boots, treading firm ground, Farmers hat, shielding from sun, Grizzled beard, hinting of experience, Unassuming presence, extraordinary potential'
+
+    gen = ImageGenerator()
+    gen.create_image(prompt=prompt)
