@@ -15,11 +15,13 @@ class Director:
 
 
     def advance_game_flow(self):
+        callback = self.advance_game_flow
         try:
-            self.current_scene = next(self.scene_iter)
+            self.current_scene = next(self.scene_iter)(callback)
         except StopIteration:
             print("Game Over!")
             # Stop the game
+
 
     def start_game(self):
         self.advance_game_flow()
