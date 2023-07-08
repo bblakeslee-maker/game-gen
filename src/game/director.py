@@ -4,7 +4,7 @@ from .scenes.cutscene import CutsceneController
 from .scenes.setup import SetupController
 from .game_types import GameState
 from .chatbot import StoryTeller
-
+from .stable_diffusion import ImageGenerator
 
 
 class Director:
@@ -13,8 +13,9 @@ class Director:
 
     def __init__(self, window: arcade.Window):
         self.window = window
-        self.state = GameState(story_teller=StoryTeller(use_cache=True))
-
+        self.state = GameState(
+            story_teller=StoryTeller(use_chatgpt=True),
+            image_generator=ImageGenerator())
 
         # game_flow = [SetupController, CutsceneController, BattleController, CutsceneController]
         game_flow = [SetupController, CutsceneController, BattleController]

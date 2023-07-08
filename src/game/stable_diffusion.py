@@ -13,7 +13,7 @@ import base64
 from typing import List, Dict
 from tqdm import tqdm
 
-SD_SERVER_IP = '172.30.0.94'
+SD_SERVER_IP = '127.0.0.1' #'172.30.0.94'
 
 
 class Character:
