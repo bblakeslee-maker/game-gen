@@ -17,7 +17,7 @@ class Director:
 
 
         # game_flow = [PrologueController, CutsceneController, BattleController, CutsceneController]
-        game_flow = [PrologueController, BattleController]
+        game_flow = [PrologueController, CutsceneController, BattleController]
         self.scene_iter = iter(game_flow)
         self.current_scene = None
 
@@ -36,5 +36,5 @@ class Director:
 
     def start_game(self):
         self.advance_game_flow()
-        
+
 

@@ -31,8 +31,9 @@ class Portrait(arcade.Section):
 
 
 class CutsceneView(arcade.View):
-    def __init__(self, width = 800, height = 600):
+    def __init__(self, is_done_callback, width = 800, height = 600):
         super().__init__()
+        self.done = is_done_callback
         self.width = width
         self.height = height
 
@@ -85,8 +86,9 @@ class CutsceneView(arcade.View):
         return self.index == len(self.content)
 
     def next(self):
-        self.index += 1
+        self.index = min(self.index + 1, len(self.content))
         if self.finished():
+            self.done()
             return
 
         event = self.content[self.index]
@@ -134,6 +136,4 @@ class CutsceneController:
     def __init__(self, state: GameState, is_done_callback):
         print("CutsceneController")
         self.done = is_done_callback
-        self.view = CutsceneView()
-
-        self.done()
+        self.view = CutsceneView(is_done_callback)
