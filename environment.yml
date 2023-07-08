@@ -26,19 +26,12 @@ dependencies:
   - wheel=0.40.0=pyhd8ed1ab_0
   - xz=5.2.6=h166bdaf_0
   - pip:
-    - arcade==2.6.17
-    - attrs==23.1.0
     - certifi==2023.5.7
-    - cffi==1.15.1
     - charset-normalizer==3.2.0
     - idna==3.4
     - numpy==1.25.0
-    - pillow==9.3.0
-    - pycparser==2.21
-    - pyglet==2.0.dev23
-    - pymunk==6.4.0
-    - pytiled-parser==2.2.0
+    - pillow==10.0.0
     - requests==2.31.0
-    - typing-extensions==4.7.1
+    - tqdm==4.65.0
     - urllib3==2.0.3
 prefix: /home/vbanerjee/miniconda3/envs/game-gen
