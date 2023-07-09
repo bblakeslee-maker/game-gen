@@ -33,7 +33,7 @@ class BattleView(arcade.View):
         super().__init__()
         self.done = is_done_callback
         self.time_elapsed = 0
-        self.state = state
+        self.state:GameState = state
         self.battle_done = False
         self.current_main_action_index = 0  # Initial main action index is 0 (Attack)
         self.current_subaction_index = 0  # Initial subaction index is 0 (first action under Attack)

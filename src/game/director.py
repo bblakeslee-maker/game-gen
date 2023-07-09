@@ -44,11 +44,11 @@ class Director:
             print("Generating images....")
             # Create main character image
             character_prompt = self.state.story_teller.main_character_prompt
-            self.state.image_generator.create_character('Bob', character_prompt)
+            self.state.image_generator.create_character('Bob', character_prompt, no_bg=True)
 
             # Create boss image
             character_prompt = self.state.story_teller.final_boss_prompt
-            self.state.image_generator.create_character('Boss', character_prompt)
+            self.state.image_generator.create_character('Boss', character_prompt, no_bg=True)
 
             print('Generating prologue card....')
             prologue_prompt = self.state.story_teller.prologue_card_prompt

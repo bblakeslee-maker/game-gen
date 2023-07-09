@@ -6,6 +6,7 @@
     - Store the character description, negative prompts, T pose (front and back), and attack types
 '''
 import io
+import random
 import base64
 import requests
 import numpy as np
@@ -24,6 +25,8 @@ CACHE_DIR.mkdir(parents=True, exist_ok=True)
 POSE_DIR = Path(__file__).parent / 'poses'
 assert POSE_DIR.exists(), f"Can't find pose img dir: {POSE_DIR}"
 
+SEED_MAX = 99999999
+
 
 class ImageObject:
     descriptors: List[str]
@@ -31,6 +34,7 @@ class ImageObject:
     back_pose: np.ndarray
     negative_prompts: List[str]
     attack_types: Dict[str, np.ndarray]
+    seed: int
 
     def __init__(
         self,
@@ -40,6 +44,7 @@ class ImageObject:
         negative_prompts=None,
         attack_types=None,
         attack_sprites=None,
+        seed=None,
     ):
 
         self.cache = CACHE_DIR
@@ -48,6 +53,7 @@ class ImageObject:
         self.front_pose = front_pose
         self.back_pose = back_pose
         self.negative_prompts = negative_prompts
+        self.seed = seed
 
         self.cache.mkdir(exist_ok=True, parents=True)
 
@@ -87,6 +93,11 @@ class ImageGenerator:
             'nudity',
             'sexy',
             'nsfw',
+            'text',
+            'written words',
+            'letters',
+            'words',
+            'watermark'
         ]
 
         self.portrait_prompts = [
@@ -119,18 +130,20 @@ class ImageGenerator:
 
         requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/options", json=override_settings)
 
-    def create_character(self, name:str, description:str):
+    def create_character(self, name:str, description:str, no_bg:bool=False):
         descriptors = description.split(',')
+        seed = random.randint(0, SEED_MAX)
 
         if name in self.image_objects:
             print('Character already exists. Skipping.')
         else:
             self.image_objects[name] = ImageObject(
                 descriptors = descriptors,
-                negative_prompts = self.negative_prompts
+                negative_prompts = self.negative_prompts,
+                seed = seed,
             )
 
-            self.get_portrait(name)
+            self.get_portrait(name, no_bg=no_bg)
 
     def create_background(self, name:str, description:str):
         descriptors = description.split(',')
@@ -140,7 +153,7 @@ class ImageGenerator:
         else:
             self.image_objects[name] = ImageObject(
                 descriptors = descriptors,
-                negative_prompts = self.negative_prompts
+                negative_prompts = self.negative_prompts,
             )
 
             self.get_background(name)
@@ -168,7 +181,7 @@ class ImageGenerator:
             'batch_size': 1,
             'denoising_strength': 0.7,
             'hr_upscaler': "Nearest",
-            'model': 'DPM++2M'
+            'model': 'DPM++ 2M Kerras'
         }
 
         request_data = requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/txt2img", json=payload)
@@ -205,11 +218,11 @@ class ImageGenerator:
 
         return request_data['image']
 
-    def get_full_body(self, name:str)->str:
+    def get_full_body(self, name:str, no_bg:bool=False)->str:
         file_path = self.cache / f'{name}_full_body.png'
 
         if not file_path.exists():
-            img = self.create_full_body(name)
+            img = self.create_full_body(name, no_bg=no_bg)
             img.save(str(file_path))
 
         return str(file_path)
@@ -256,6 +269,9 @@ class ImageGenerator:
             }
         }
 
+        if self.image_objects[name].seed is not None:
+            payload['seed'] = self.image_objects[name].seed
+
         request_data = requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/txt2img", json=payload)
         request_data = request_data.json()
 
@@ -268,11 +284,11 @@ class ImageGenerator:
 
         return img
 
-    def get_portrait(self, name:str)->str:
+    def get_portrait(self, name:str, no_bg:bool=False)->str:
         file_path = self.cache / f'{name}_portrait.png'
 
         if not file_path.exists():
-            img = self.create_portrait(name)
+            img = self.create_portrait(name, no_bg=no_bg)
             img.save(str(file_path))
 
         return str(file_path)
@@ -317,6 +333,9 @@ class ImageGenerator:
                 }
             }
         }
+
+        if self.image_objects[name].seed is not None:
+            payload['seed'] = self.image_objects[name].seed
 
         request_data = requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/txt2img", json=payload)
         request_data = request_data.json()
