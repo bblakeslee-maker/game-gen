@@ -2,6 +2,7 @@ import arcade
 from .scenes.battle import BattleController
 from .scenes.cutscene import CutsceneController
 from .scenes.setup import SetupController
+from .scenes.text_dump import TextDumpController
 from .game_types import GameState
 from .chatbot import StoryTeller
 from .stable_diffusion import ImageGenerator
@@ -14,13 +15,12 @@ class Director:
         self.window = window
         self.state = GameState(
             story_teller=StoryTeller(use_chatgpt=False),
-            window_size=(800, 600),
+            window_size=window.size,
             is_prologue=True,
             battle_won=False,
             image_generator=ImageGenerator())
 
-        # game_flow = [SetupController, CutsceneController, BattleController, CutsceneController]
-        game_flow = [SetupController, CutsceneController, BattleController, CutsceneController]
+        game_flow = [SetupController, TextDumpController, CutsceneController, BattleController, CutsceneController]
         self.scene_iter = iter(game_flow)
         self.current_scene = None
         self.stage_count = 0
@@ -60,9 +60,6 @@ class Director:
             print("Game Over!")
             self.window.close()
             arcade.exit()
-
-
-
 
 
     def start_game(self):

@@ -14,6 +14,7 @@ class Portrait(arcade.Section):
     def __init__(self, left, bottom, width, height, **kwargs):
         super().__init__(left, bottom, width, height, **kwargs)
         self.background = None
+        self.is_active = False
         self.is_open = False
 
     def open(self, background):
@@ -28,6 +29,8 @@ class Portrait(arcade.Section):
     def on_draw(self):
         if self.is_open:
             self.background.draw(self.left, self.bottom, self.width, self.height)
+            if not self.is_active:
+                arcade.draw_xywh_rectangle_filled(self.left, self.bottom, self.width, self.height, [0, 0, 0, 127])
 
 
 class CutsceneView(arcade.View):
@@ -41,9 +44,9 @@ class CutsceneView(arcade.View):
         self.events = []
         self.index = 0
 
-        self.dialog_height = 100
-        self.portrait_width = 256
-        self.portrait_height = 256
+        self.dialog_height = 200
+        self.portrait_width = 400
+        self.portrait_height = 400
 
         self.portrait_side = 0
 
@@ -80,10 +83,8 @@ class CutsceneView(arcade.View):
         dialog = ""
 
         if self.state.is_prologue:
-            self.state.story_teller.create_prologue_dialogue()
             dialog = self.state.story_teller.prologue_dialogue
         else:
-            self.state.story_teller.create_epilogue_dialogue()
             if self.state.battle_won:
                 dialog = self.state.story_teller.epilogue_victory_dialogue
             else:
@@ -153,13 +154,13 @@ class CutsceneView(arcade.View):
         self.dialog_section.close()
         self.dialog_section.open(event.dialog)
 
-        self.left_char_portrait_section.close()
-        self.right_char_portrait_section.close()
-
         if event.portrait_side == 0:
             self.left_char_portrait_section.open(event.portrait)
         else:
             self.right_char_portrait_section.open(event.portrait)
+
+        self.left_char_portrait_section.is_active = event.portrait_side == 0
+        self.right_char_portrait_section.is_active = event.portrait_side == 1
 
     def on_update(self, delta_time: float):
         pass

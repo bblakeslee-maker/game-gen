@@ -20,7 +20,7 @@ class DialogBox(arcade.Section):
         self.content = []
         self.index = 0
 
-        self.background = Drawable(color = arcade.color.RED)
+        self.background = Drawable(color = arcade.color.BLACK)
         self.left = left
         self.bottom = bottom
         self.width = width
@@ -48,7 +48,6 @@ class DialogBox(arcade.Section):
             return
 
         text = self.content[self.index]
-        print(self.content)
         if self._char_index == len(text):
             self.index += 1
             self._char_index = 0
@@ -57,8 +56,8 @@ class DialogBox(arcade.Section):
         self.is_open = False
 
     def on_draw(self):
-        FONT_SIZE = 14
-        PADDING = 4
+        FONT_SIZE = 24
+        PADDING = 50
 
         start_y = self.bottom + self.height - PADDING - FONT_SIZE
         start_x = self.left + PADDING
@@ -66,7 +65,7 @@ class DialogBox(arcade.Section):
             self.background.draw(self.left, self.bottom, self.width, self.height)
             text = self.content[self.index]
             self._char_index = min(self._char_index + 1, len(text))
-            arcade.draw_text(text[:self._char_index], start_x, start_y, arcade.color.WHITE, 14, multiline=True, width=self.width - 2 * PADDING)
+            arcade.draw_text(text[:self._char_index], start_x, start_y, arcade.color.WHITE, FONT_SIZE, multiline=True, width=self.width - 2 * PADDING)
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         if self.callback != None:

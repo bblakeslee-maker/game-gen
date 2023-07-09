@@ -3,8 +3,8 @@ import arcade.gui
 
 from game.director import Director
 
-WIDTH = 800
-HEIGHT = 600
+WIDTH = 1200
+HEIGHT = 900
 
 def main():
     """ Startup """

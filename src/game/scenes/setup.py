@@ -70,6 +70,7 @@ class SetupView(arcade.View):
                 self.text_area.text = ""
             except StopIteration:
                 print(self.state.setup_results)
+                self.manager.clear()
                 self.done()
 
 
