@@ -66,7 +66,7 @@ class StoryTeller:
     def create_prologue(self):
         payload = [
             {'role': 'system', 'content': self.BASE_PROMPT},
-            {'role': 'context', 'content': self.EXTRA_CONTEXT},
+            {'role': 'system', 'content': self.EXTRA_CONTEXT},
             {'role': 'user',
              'content': f'{self.player_name} is a {self.player_job} in a {self.genre} story '
                         f'with a {self.tone} style.  Write a single paragraph prologue for the story.'}
@@ -144,7 +144,8 @@ class StoryTeller:
 
     def create_final_boss(self):
         payload = [
-            {'role': 'system', 'content': self.prologue},
+            {'role': 'system', 'content': f'The story is "{self.prologue}".  The hero of the story is '
+                                          f'{self.player_name}, who is {self.main_character_description}.'},
             {'role': 'user', 'content': f'Describe the appearance of a final boss that '
                                         f'{self.player_name} the {self.player_job} '
                                         f'needs to fight in one paragraph.'}
@@ -189,7 +190,7 @@ class StoryTeller:
         payload = [
             {'role': 'system',
              'content': self.BASE_PROMPT + ' ' + self.prologue + ' ' + self.final_boss_description},
-            {'role': 'context', 'content': self.EXTRA_CONTEXT},
+            {'role': 'system', 'content': self.EXTRA_CONTEXT},
             {'role': 'user', 'content': f'Write a single paragraph ending for this {self.genre} '
                                         f'story with {self.tone} tone, assuming that {self.player_name} is victorious.'
                                         f'Do not make a list of paragraphs.'}
@@ -198,7 +199,7 @@ class StoryTeller:
         payload = [
             {'role': 'system',
              'content': self.BASE_PROMPT + ' ' + self.prologue + ' ' + self.final_boss_description},
-            {'role': 'context', 'content': self.EXTRA_CONTEXT},
+            {'role': 'system', 'content': self.EXTRA_CONTEXT},
             {'role': 'user', 'content': f'Write a single paragraph ending for this {self.genre} '
                                         f'story with {self.tone} tone, assuming that {self.player_name} loses the fight.'
                                         f'Do not make a list of paragraphs.'}
