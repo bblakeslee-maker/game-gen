@@ -25,9 +25,12 @@ class Background(arcade.Section):
 class Portrait(arcade.Section):
     def __init__(self, left, bottom, width, height, **kwargs):
         super().__init__(left, bottom, width, height, **kwargs)
+        self.init_size = (width, height)
         self.background = None
         self.is_active = False
         self.is_open = False
+        self.time_elapsed = 0
+
 
     def open(self, background):
         self.background = background
@@ -40,8 +43,18 @@ class Portrait(arcade.Section):
     def on_draw(self):
         if self.is_open:
             self.background.draw(self.left, self.bottom, self.width, self.height)
-            if not self.is_active:
-                arcade.draw_xywh_rectangle_filled(self.left, self.bottom, self.width, self.height, [0, 0, 0, 160])
+
+            if self.is_active:
+                scalar = 1.2
+            else:
+                scalar = 1.
+
+            self.width = self.init_size[0] * scalar
+            self.height = self.init_size[1] * scalar
+
+
+    def on_update(self, delta_time: float):
+        self.time_elapsed += delta_time
 
 
 class CutsceneView(arcade.View):
@@ -58,7 +71,6 @@ class CutsceneView(arcade.View):
         self.dialog_height = 200
         self.portrait_width = 400
         self.portrait_height = 400
-
         self.portrait_side = 0
 
         # Add sections for each of the areas:
