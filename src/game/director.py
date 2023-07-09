@@ -31,7 +31,19 @@ class Director:
             image_generator=ImageGenerator(),
             audio_manager=AudioManager(music_dir=MUSIC_DIR))
 
-        game_flow = [SetupController, LoadingController, TitleController, TextDumpController, LoadingController, CutsceneController, BattleController, CutsceneController]
+        game_flow = [
+            SetupController,
+            LoadingController,
+            TitleController,
+            TextDumpController,
+            LoadingController,
+            CutsceneController,
+            BattleController,
+            CutsceneController,
+            TitleController
+        ]
+
+        self.num_stages = len(game_flow)
         self.scene_iter = iter(game_flow)
         self.current_scene = None
         self.stage_count = 0
@@ -159,10 +171,16 @@ class Director:
             # Wait for the final content to generate
             self.state.ending_content_future.result()
 
+        kwargs = {}
+
+        if self.num_stages == self.stage_count:
+            kwargs = {'ending':True}
+
         callback = self.advance_game_flow
+
         try:
             args = (self.state, callback)
-            self.current_scene = next(self.scene_iter)(*args)
+            self.current_scene = next(self.scene_iter)(*args, **kwargs)
             self.window.clear()
             self.window.show_view(self.current_scene.view)
         except StopIteration:
