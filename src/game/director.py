@@ -125,14 +125,14 @@ class Director:
         if self.stage_count == 3:
             # play intro music
             music_file = self.state.audio_manager.get_intro_music()
-            audio = arcade.load_sound(str(music_file),False)
+            audio = arcade.load_sound(str(music_file),True)
             self.state.audio_player = arcade.play_sound(audio,1.0,-1,False)
         elif self.stage_count == 7:
             # play battle music
             arcade.stop_sound(self.state.audio_player)
 
             music_file = self.state.audio_manager.get_battle_music()
-            audio = arcade.load_sound(str(music_file),False)
+            audio = arcade.load_sound(str(music_file),True)
             self.state.audio_player = arcade.play_sound(audio,1.0,-1,False)
         elif self.stage_count == 8:
             if self.state.battle_won:
@@ -140,14 +140,14 @@ class Director:
                 arcade.stop_sound(self.state.audio_player)
 
                 music_file = self.state.audio_manager.get_victory_music()
-                audio = arcade.load_sound(str(music_file),False)
+                audio = arcade.load_sound(str(music_file),True)
                 self.state.audio_player = arcade.play_sound(audio,1.0,-1,False)
             else:
                 # play defeat music
                 arcade.stop_sound(self.state.audio_player)
 
                 music_file = self.state.audio_manager.get_defeat_music()
-                audio = arcade.load_sound(str(music_file),False)
+                audio = arcade.load_sound(str(music_file),True)
                 self.state.audio_player = arcade.play_sound(audio,1.0,-1,False)
 
         if self.stage_count > 5:
