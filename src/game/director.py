@@ -34,7 +34,6 @@ class Director:
             # Use the results from the first scene to set up the story teller
 
             print("Generating story.....")
-
             # Should be retrieved from the SetupController
             name, occupation, more_info = self.state.setup_results.values()
             self.state.story_teller.add_basic_character_info(name, occupation, more_info)
