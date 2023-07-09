@@ -27,6 +27,32 @@ assert POSE_DIR.exists(), f"Can't find pose img dir: {POSE_DIR}"
 
 SEED_MAX = 99999999
 
+def retry(times, exceptions):
+    """
+    From: https://stackoverflow.com/questions/50246304/using-python-decorators-to-retry-request
+    Retry Decorator
+    Retries the wrapped function/method `times` times if the exceptions listed
+    in ``exceptions`` are thrown
+    :param times: The number of times to repeat the wrapped function/method
+    :type times: Int
+    :param Exceptions: Lists of exceptions that trigger a retry attempt
+    :type Exceptions: Tuple of Exceptions
+    """
+    def decorator(func):
+        def newfn(*args, **kwargs):
+            attempt = 0
+            while attempt < times:
+                try:
+                    return func(*args, **kwargs)
+                except exceptions:
+                    print(
+                        'Exception thrown when attempting to run %s, attempt '
+                        '%d of %d' % (func, attempt, times)
+                    )
+                    attempt += 1
+            return func(*args, **kwargs)
+        return newfn
+    return decorator
 
 class ImageObject:
     descriptors: List[str]
@@ -72,10 +98,6 @@ class ImageObject:
 
     def add_negative_prompt(self, negative):
         self.negative_prompts.append(negative)
-
-    def add_attack(self, attack_type, attack_sprite):
-        if attack_type not in self.attack_types:
-            self.attack_types[attack_type] = attack_sprite
 
 
 class ImageGenerator:
@@ -158,6 +180,7 @@ class ImageGenerator:
 
             self.get_background(name)
 
+    @retry(3, KeyError)
     def get_background(self, name:str):
         if name not in self.image_objects:
             print(f'Background {name} does not exist')
@@ -187,11 +210,7 @@ class ImageGenerator:
         request_data = requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/txt2img", json=payload)
         request_data = request_data.json()
 
-        try:
-            img = request_data['images'][0]
-        except:
-            print(request_data)
-
+        img = request_data['images'][0]
 
         img = Image.open(io.BytesIO(base64.b64decode(img.split(",",1)[0])))
         img.save(file_name)
@@ -232,6 +251,7 @@ class ImageGenerator:
 
         return str(file_path)
 
+    @retry(3, KeyError)
     def create_full_body(self, name:str, no_bg:bool=False):
         if name not in self.image_objects:
             print(f'Character does not exist: {name}')
@@ -298,6 +318,7 @@ class ImageGenerator:
 
         return str(file_path)
 
+    @retry(3, KeyError)
     def create_portrait(self, name:str, no_bg:bool=False):
         if name not in self.image_objects:
             print(f'Character does not exist: {name}')
