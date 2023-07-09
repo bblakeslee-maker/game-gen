@@ -33,7 +33,6 @@ class LoadingView(arcade.View):
 
 
     def on_update(self, delta_time: float):
-        self.section_manager.clear_sections()
         self.done()
 
     def on_draw(self):
