@@ -1,4 +1,8 @@
 import arcade
+from pathlib import Path
+
+SPEECH_SFX = arcade.Sound(Path(__file__).parent / '../../resources/sound/speech3.wav')
+
 
 from game.drawable import Drawable
 
@@ -60,6 +64,9 @@ class DialogBox(arcade.Section):
                 self._char_index = len(text)
             else:
                 self._char_index = min(self._char_index + self.char_per_frame, len(text))
+                if self._char_index < len(text) and self._char_index % 6 == 0:
+                    SPEECH_SFX.play(volume=0.5)
+
             arcade.draw_text(text[:self._char_index], start_x, start_y, arcade.color.WHITE, self.font_size, multiline=True, width=self.width - 2 * self.padding)
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
