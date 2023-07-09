@@ -62,7 +62,7 @@ class BattleView(arcade.View):
         self.player_sprite.center_y = 320
         self.player_sprite.draw()
 
-        enemy_image = self.state.image_generator.get_portrait('Boss')
+        enemy_image = self.state.image_generator.get_portrait(self.state.story_teller.final_boss_name)
         self.enemy_sprite = arcade.Sprite(enemy_image, BOSS_SCALING)
 
         self.enemy_sprite.center_x = 620

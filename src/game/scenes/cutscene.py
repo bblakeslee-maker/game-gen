@@ -10,6 +10,18 @@ class CutsceneEvent():
         self.portrait_side = side
         self.background = background
 
+class Background(arcade.Section):
+    def __init__(self, left, bottom, width, height, **kwargs):
+        super().__init__(left, bottom, width, height, **kwargs)
+        self.background = dialog_box.Drawable(color = arcade.color.BLACK)
+
+    def open(self, background):
+        self.background = background
+
+    def on_draw(self):
+        self.background.draw(self.left, self.bottom, self.width, self.height)
+
+
 class Portrait(arcade.Section):
     def __init__(self, left, bottom, width, height, **kwargs):
         super().__init__(left, bottom, width, height, **kwargs)
@@ -50,10 +62,21 @@ class CutsceneView(arcade.View):
         self.portrait_side = 0
 
         # Add sections for each of the areas:
-        self.bg_section = arcade.Section(0,
-                                         self.height,
-                                         self.width,
-                                         self.height - self.dialog_height)
+        self.bg_section = Background(0,
+                                     self.dialog_height,
+                                     self.width,
+                                     self.height - self.dialog_height)
+        if self.state.is_prologue:
+            background_path = self.state.image_generator.get_background('prologue')
+        else:
+            if self.state.battle_won:
+                background_path = self.state.image_generator.get_background('epilogue-victory')
+            else:
+                background_path = self.state.image_generator.get_background('epilogue-defeat')
+
+        print(background_path)
+
+        self.bg_section.open(dialog_box.Drawable(texture = arcade.load_texture(background_path)))
 
         self.dialog_section = dialog_box.DialogBox(0,
                                                    0,
@@ -109,7 +132,7 @@ class CutsceneView(arcade.View):
                 side = 1 - side
 
             if character not in character_portrait:
-                char_name = self.state.story_teller.player_name if character_side[character] == 0 else 'Boss'
+                char_name = self.state.story_teller.player_name if character_side[character] == 0 else self.state.story_teller.final_boss_name
                 portrait_texture = self.state.image_generator.get_portrait(char_name)
                 character_portrait[character] = arcade.load_texture(portrait_texture)
 
