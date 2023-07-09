@@ -127,6 +127,7 @@ class Director:
         try:
             args = (self.state, callback)
             self.current_scene = next(self.scene_iter)(*args)
+            self.window.clear()
             self.window.show_view(self.current_scene.view)
         except StopIteration:
             print("Game Over!")
