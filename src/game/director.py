@@ -34,7 +34,6 @@ class Director:
             # Use the results from the first scene to set up the story teller
 
             print("Generating story.....")
-
             # Should be retrieved from the SetupController
             name, occupation, more_info = self.state.setup_results.values()
             self.state.story_teller.add_basic_character_info(name, occupation, more_info)
@@ -45,11 +44,15 @@ class Director:
             print("Generating images....")
             # Create main character image
             character_prompt = self.state.story_teller.main_character_prompt
-            self.state.image_generator.create_character(name, character_prompt)
+            self.state.image_generator.create_character(name, character_prompt, no_bg=True)
 
             # Create boss image
             character_prompt = self.state.story_teller.final_boss_prompt
-            self.state.image_generator.create_character('Boss', character_prompt)
+            self.state.image_generator.create_character('Boss', character_prompt, no_bg=True)
+
+            print('Generating prologue card....')
+            prologue_prompt = self.state.story_teller.prologue_card_prompt
+            self.state.image_generator.create_background('prologue', prologue_prompt)
 
 
         callback = self.advance_game_flow
@@ -65,4 +68,3 @@ class Director:
 
     def start_game(self):
         self.advance_game_flow()
-
