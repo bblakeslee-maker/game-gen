@@ -19,26 +19,38 @@ class Director:
             battle_won=False,
             image_generator=ImageGenerator())
 
-        # Should be retrieved from the SetupController
-        self.state.story_teller.add_basic_character_info("Bob", "Builder", "He can totally fix anything, except his marriage.")
-
-        # Generate story
-        self.state.story_teller.generate_story()
-
-        # Create main character image
-        character_prompt = self.state.story_teller.main_character_prompt
-        self.state.image_generator.create_character('Bob', character_prompt)
-
-        # Create boss image
-        character_prompt = self.state.story_teller.final_boss_prompt
-        self.state.image_generator.create_character('Boss', character_prompt)
-
         # game_flow = [SetupController, CutsceneController, BattleController, CutsceneController]
         game_flow = [SetupController, CutsceneController, BattleController, CutsceneController]
         self.scene_iter = iter(game_flow)
         self.current_scene = None
+        self.stage_count = 0
+
 
     def advance_game_flow(self):
+
+        self.stage_count += 1
+        if self.stage_count == 2:
+            # Use the results from the first scene to set up the story teller
+
+            print("Generating story.....")
+
+            # Should be retrieved from the SetupController
+            name, occupation, more_info = self.state.setup_results.values()
+            self.state.story_teller.add_basic_character_info(name, occupation, more_info)
+
+            # Generate story
+            self.state.story_teller.generate_story()
+
+            print("Generating images....")
+            # Create main character image
+            character_prompt = self.state.story_teller.main_character_prompt
+            self.state.image_generator.create_character('Bob', character_prompt)
+
+            # Create boss image
+            character_prompt = self.state.story_teller.final_boss_prompt
+            self.state.image_generator.create_character('Boss', character_prompt)
+
+
         callback = self.advance_game_flow
         try:
             args = (self.state, callback)
@@ -50,5 +62,9 @@ class Director:
             arcade.exit()
 
 
+
+
+
     def start_game(self):
         self.advance_game_flow()
+

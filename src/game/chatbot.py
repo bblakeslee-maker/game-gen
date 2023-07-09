@@ -13,6 +13,9 @@ SYS_PROMPT = 'You are the narrator for an epic fantasy story.'
 class StoryTeller:
     def __init__(self, use_chatgpt):
         self.use_chatgpt = use_chatgpt
+        if use_chatgpt:
+            openai.api_key = os.getenv('CHAT_GPT_KEY')
+
         self.BASE_PROMPT = 'Pretend you are the narrator of a video game.  Your job ' \
                            'is to generate plotlines for the story.'
         self.PROMPT_FORMATTING = 'Format the phrases as a list like this:' \
@@ -24,6 +27,17 @@ class StoryTeller:
                                  'until you generate enough dialogue.'
         self.MODEL = 'gpt-3.5-turbo'
 
+    # from tenacity import (
+    #     retry,
+    #     stop_after_attempt,
+    #     wait_random_exponential,
+    # )  # for exponential backoff
+    #
+    # @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
+    # def completion_with_backoff(**kwargs):
+    #     return openai.Completion.create(**kwargs)
+    #
+    # completion_with_backoff(model="text-davinci-003", prompt="Once upon a time,")
 
     def invoke_chatgpt(self, payload):
         response = openai.ChatCompletion.create(model=self.MODEL, messages=payload)
@@ -371,7 +385,7 @@ def main():
                         help='Set to enable ChatGPT interface.')
     args = parser.parse_args()
 
-    openai.api_key = os.getenv('CHAT_GPT_KEY')
+
 
     storyteller = StoryTeller(args.use_chatgpt)
 
