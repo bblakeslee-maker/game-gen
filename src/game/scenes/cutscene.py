@@ -29,7 +29,7 @@ class Portrait(arcade.Section):
         if self.is_open:
             self.background.draw(self.left, self.bottom, self.width, self.height)
             if not self.is_active:
-                arcade.draw_xywh_rectangle_filled(self.left, self.bottom, self.width, self.height, [0, 0, 0, 127])
+                arcade.draw_xywh_rectangle_filled(self.left, self.bottom, self.width, self.height, [0, 0, 0, 160])
 
 
 class CutsceneView(arcade.View):
@@ -99,6 +99,9 @@ class CutsceneView(arcade.View):
         lines = dialog.strip().split('\n')
 
         for line in lines:
+            if line.find(': ') == -1:
+                continue
+
             character, text = line.split(': ', 1)
 
             if character not in character_side:

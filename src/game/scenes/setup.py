@@ -49,8 +49,8 @@ class SetupView(arcade.View):
         if DEFAULT_ANSWERS:
             text = answer
         self.text_area = arcade.gui.UIInputText(text=text,
-                                           width=450,
-                                           height=100,
+                                           width=700,
+                                           height=200,
                                            font_size=16,
                                            font_name="Arial",
                                            multiline=True)

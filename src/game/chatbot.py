@@ -38,14 +38,15 @@ class StoryTeller:
         self.player_name = name
         self.player_job = occupation
         self.player_misc = extra_info
+        self.EXTRA_CONTEXT = f'This is extra context about the main character {self.player_name}: "{self.player_misc}"'
 
     def generate_story(self):
         self.select_story_genre()
         self.select_artistic_tone()
         self.create_prologue()
+        self.create_main_character()
         self.create_final_boss()
         self.create_prologue_dialogue()
-        self.create_main_character()
         self.create_endings()
         self.create_epilogue_dialogue()
         self.create_story_card_prompts()
@@ -59,11 +60,13 @@ class StoryTeller:
                         f'information {self.player_misc}, what genre of story '
                         f'should be created?  Respond with a list of three single words.'}
         ]
-        self.genre = self.invoke_chatgpt(payload)
+        temp = self.invoke_chatgpt(payload)
+        self.genre = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace('\n', '')
 
     def create_prologue(self):
         payload = [
             {'role': 'system', 'content': self.BASE_PROMPT},
+            {'role': 'system', 'content': self.EXTRA_CONTEXT},
             {'role': 'user',
              'content': f'{self.player_name} is a {self.player_job} in a {self.genre} story '
                         f'with a {self.tone} style.  Write a single paragraph prologue for the story.'}
@@ -76,8 +79,8 @@ class StoryTeller:
             {'role': 'user',
              'content': 'Describe the visual artistic style and mood of the above story in 3 or 4 words.'}
         ]
-        self.tone = self.invoke_chatgpt(payload)
-
+        temp = self.invoke_chatgpt(payload)
+        self.tone = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace('\n', '')
 
     def create_prologue_dialogue(self):
         payload = [
@@ -141,7 +144,8 @@ class StoryTeller:
 
     def create_final_boss(self):
         payload = [
-            {'role': 'system', 'content': self.prologue},
+            {'role': 'system', 'content': f'The story is "{self.prologue}".  The hero of the story is '
+                                          f'{self.player_name}, who is {self.main_character_description}.'},
             {'role': 'user', 'content': f'Describe the appearance of a final boss that '
                                         f'{self.player_name} the {self.player_job} '
                                         f'needs to fight in one paragraph.'}
@@ -186,6 +190,7 @@ class StoryTeller:
         payload = [
             {'role': 'system',
              'content': self.BASE_PROMPT + ' ' + self.prologue + ' ' + self.final_boss_description},
+            {'role': 'system', 'content': self.EXTRA_CONTEXT},
             {'role': 'user', 'content': f'Write a single paragraph ending for this {self.genre} '
                                         f'story with {self.tone} tone, assuming that {self.player_name} is victorious.'
                                         f'Do not make a list of paragraphs.'}
@@ -194,6 +199,7 @@ class StoryTeller:
         payload = [
             {'role': 'system',
              'content': self.BASE_PROMPT + ' ' + self.prologue + ' ' + self.final_boss_description},
+            {'role': 'system', 'content': self.EXTRA_CONTEXT},
             {'role': 'user', 'content': f'Write a single paragraph ending for this {self.genre} '
                                         f'story with {self.tone} tone, assuming that {self.player_name} loses the fight.'
                                         f'Do not make a list of paragraphs.'}
@@ -201,6 +207,17 @@ class StoryTeller:
         self.epilogue_defeat = self.invoke_chatgpt(payload)
 
     def create_story_card_prompts(self):
+        payload = [
+            {'role': 'system',
+             'content': self.prologue + '  ' + self.main_character_description + '  ' + self.final_boss_description},
+            {'role': 'user', 'content': f'Describe a title image for this story, featuring the '
+                                        f'characters {self.player_name} and {self.final_boss_name}.  '
+                                        f'Use a list of five phrases, each five words or less.  ' +
+                                        self.PROMPT_FORMATTING + f'Do not refer to {self.player_name} or '
+                                                                 f'{self.final_boss_name}, only describe the image.'}
+        ]
+        temp = self.invoke_chatgpt(payload)
+        self.title_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
         payload = [
             {'role': 'system', 'content': self.prologue},
             {'role': 'user', 'content': f'Describe the scene depicted in this plot, in five phrases,'
@@ -252,6 +269,7 @@ def main():
     print('Title: \n' + storyteller.title + '\n')
     print('Genre: \n' + storyteller.genre + '\n')
     print('Tone: \n' + storyteller.tone + '\n')
+    print('Title Prompt: \n' + storyteller.title_card_prompt + '\n')
     print('Prologue: \n' + storyteller.prologue + '\n')
     print('Prologue Dialogue: \n' + storyteller.prologue_dialogue + '\n')
     print('Prologue Prompt: \n' + storyteller.prologue_card_prompt + '\n')
