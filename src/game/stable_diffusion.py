@@ -128,13 +128,9 @@ class ImageGenerator:
             'head-shot',
             'face',
             'chest-up'
-            'green screen background'
-        ]
-
-        self.full_body_prompts = [
-            'full color'
-            'full-body shot',
-            'green screen background',
+            'white background',
+            'empty background',
+            'plain background',
         ]
 
         override_settings = {
@@ -145,7 +141,10 @@ class ImageGenerator:
         }
 
         self.cache = IMAGE_OUT_DIR
-        self.poses = POSE_DIR
+        self.poses = []
+
+        for file in POSE_DIR.glob('*jpg'):
+            self.poses.append(file)
 
         # for file in self.cache.glob('*.png'):
         #     file.unlink()
@@ -180,7 +179,7 @@ class ImageGenerator:
 
             self.get_background(name)
 
-    @retry(3, KeyError)
+    @retry(3, [KeyError, requests.exceptions.ConnectTimeout])
     def get_background(self, name:str):
         if name not in self.image_objects:
             print(f'Background {name} does not exist')
@@ -242,73 +241,6 @@ class ImageGenerator:
 
         return request_data['image']
 
-    def get_full_body(self, name:str, no_bg:bool=False)->str:
-        file_path = self.cache / f'{name}_full_body.png'
-
-        if not file_path.exists():
-            img = self.create_full_body(name, no_bg=no_bg)
-            img.save(str(file_path))
-
-        return str(file_path)
-
-    @retry(3, KeyError)
-    def create_full_body(self, name:str, no_bg:bool=False):
-        if name not in self.image_objects:
-            print(f'Character does not exist: {name}')
-            return
-
-        pos_prompt = self.image_objects[name].descriptors
-        neg_prompt = self.image_objects[name].negative_prompts
-
-        pos_prompt = self.full_body_prompts + pos_prompt
-        neg_prompt =  neg_prompt + ['missing torso', 'missing legs', 'missing arms', 'noisy background']
-
-        pos_prompt = ', '.join(pos_prompt)
-        neg_prompt = ', '.join(neg_prompt)
-
-
-        # Seed controlnet
-        pose_file_name = self.poses / f'full_body_looking_down_pose' / 'source_img.png'
-        pose_img = cv2.imread(str(pose_file_name))
-        _, bytes = cv2.imencode('.png', pose_img)
-        pose_img = base64.b64encode(bytes).decode('utf-8')
-
-        payload = {
-            'prompt': pos_prompt,
-            'negative_prompt': neg_prompt,
-            'steps': 50,
-            'restore_faces': True,
-            'batch_size': 1,
-            'denoising_strength': 0.7,
-            'hr_upscaler': "Nearest",
-            "alwayson_scripts": {
-                "controlnet":{
-                    "args":[
-                        {
-                        "input_image": pose_img,
-                        'module': 'openpose',
-                        "model": "control_v11p_sd15_openpose [cab727d4]"
-                        }
-                    ]
-                }
-            }
-        }
-
-        if self.image_objects[name].seed is not None:
-            payload['seed'] = self.image_objects[name].seed
-
-        request_data = requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/txt2img", json=payload)
-        request_data = request_data.json()
-
-        img = request_data['images'][0]
-
-        if no_bg:
-            img = self.remove_bg(img)
-
-        img = Image.open(io.BytesIO(base64.b64decode(img.split(",",1)[0])))
-
-        return img
-
     def get_portrait(self, name:str, no_bg:bool=False)->str:
         file_path = self.cache / f'{name}_portrait.png'
 
@@ -318,7 +250,7 @@ class ImageGenerator:
 
         return str(file_path)
 
-    @retry(3, KeyError)
+    @retry(3, [KeyError, requests.exceptions.ConnectTimeout])
     def create_portrait(self, name:str, no_bg:bool=False):
         if name not in self.image_objects:
             print(f'Character does not exist: {name}')
@@ -334,7 +266,7 @@ class ImageGenerator:
 
 
         # Seed controlnet
-        pose_file_name = self.poses / f'3_4th_profile_pose' / 'source_img.png'
+        pose_file_name = random.choice(self.poses)
         pose_img = cv2.imread(str(pose_file_name))
         _, bytes = cv2.imencode('.png', pose_img)
         pose_img = base64.b64encode(bytes).decode('utf-8')
