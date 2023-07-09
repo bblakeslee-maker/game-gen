@@ -49,7 +49,7 @@ class TitleText(arcade.Section):
                 align="center")
 
 class TitleView(arcade.View):
-    def __init__(self, state: GameState, is_done_callback):
+    def __init__(self, state: GameState, is_done_callback, ending=False):
         super().__init__()
         self.state = state
         self.done = is_done_callback
@@ -79,7 +79,11 @@ class TitleView(arcade.View):
                                        0,
                                        self.width,
                                        self.height)
-        self.title_section.content = self.state.story_teller.title
+
+        if ending:
+            self.title_section.content = "The End"
+        else:
+            self.title_section.content = self.state.story_teller.title
 
         background_path = self.state.image_generator.get_background('title-card')
 
@@ -92,7 +96,7 @@ class TitleView(arcade.View):
     def on_update(self, delta_time: float):
         self.time_elapsed += delta_time
 
-        if self.time_elapsed > 1.0:
+        if self.time_elapsed > 5.0:
             self.done_waiting = True
 
     def on_draw(self):
@@ -106,7 +110,7 @@ class TitleView(arcade.View):
 class TitleController:
     view: TitleView
 
-    def __init__(self, state: GameState, is_done_callback):
+    def __init__(self, state: GameState, is_done_callback, ending=False):
         print("TitleController")
         self.done = is_done_callback
-        self.view = TitleView(state, is_done_callback)
+        self.view = TitleView(state, is_done_callback, ending=ending)
