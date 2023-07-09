@@ -19,8 +19,8 @@ import cv2
 SD_SERVER_IP = '172.30.0.94'
 
 
-CACHE_DIR = Path('/tmp/gamegen_img_cache')
-CACHE_DIR.mkdir(parents=True, exist_ok=True)
+IMAGE_OUT_DIR = Path('/tmp/gamegen_img_cache')
+IMAGE_OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 POSE_DIR = Path(__file__).parent / 'poses'
 assert POSE_DIR.exists(), f"Can't find pose img dir: {POSE_DIR}"
@@ -47,7 +47,7 @@ class ImageObject:
         seed=None,
     ):
 
-        self.cache = CACHE_DIR
+        self.cache = IMAGE_OUT_DIR
         self.poses = POSE_DIR
         self.descriptors = descriptors
         self.front_pose = front_pose
@@ -122,11 +122,11 @@ class ImageGenerator:
             'steps': 50
         }
 
-        self.cache = CACHE_DIR
+        self.cache = IMAGE_OUT_DIR
         self.poses = POSE_DIR
 
-        for file in self.cache.glob('*.png'):
-            file.unlink()
+        # for file in self.cache.glob('*.png'):
+        #     file.unlink()
 
         requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/options", json=override_settings)
 

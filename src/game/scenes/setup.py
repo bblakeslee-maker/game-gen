@@ -9,6 +9,12 @@ QUESTIONS = [
     "Any Additional Info:"
 ]
 
+ENABLE_DEFAULT_ANSWERS = True
+DEFAULT_ANSWERS = [
+    "Angus McFife",
+    "Fighter, Protector of Dundee",
+    "Angus uses is mighty hammer to protect the land of Fife. His enemy is Zargothrax: Master of Nightmares, Keeper of Celestial Flame, Sorcerer, Bound to the Darkness, Wizard King, Chaos Incarnate"
+]
 
 class SetupView(arcade.View):
     def __init__(self, state: GameState, is_done_callback):
@@ -23,14 +29,15 @@ class SetupView(arcade.View):
         # Set background color
         arcade.set_background_color((10,10,10))
         self.v_box = arcade.gui.UIBoxLayout()
-        self.question_iter = iter(QUESTIONS)
+        self.question_iter = zip(QUESTIONS, DEFAULT_ANSWERS)
         self.question_widget = None
 
 
 
         # # Create a text label
+        question, answer = next(self.question_iter)
         self.question_label = arcade.gui.UITextArea(
-                                            text=next(self.question_iter),
+                                            text=question,
                                             width=600,
                                             height=40,
                                             font_size=24,
@@ -39,6 +46,8 @@ class SetupView(arcade.View):
 
         # Create an entry box
         text = ""
+        if DEFAULT_ANSWERS:
+            text = answer
         self.text_area = arcade.gui.UIInputText(text=text,
                                            width=450,
                                            height=100,
@@ -66,8 +75,9 @@ class SetupView(arcade.View):
 
             self.state.setup_results[self.question_label.text] = self.text_area.text
             try:
-                self.question_label.text = next(self.question_iter)
-                self.text_area.text = ""
+                question, answer = next(self.question_iter)
+                self.question_label.text = question
+                self.text_area.text = "" if not ENABLE_DEFAULT_ANSWERS else answer
             except StopIteration:
                 print(self.state.setup_results)
                 self.manager.clear()
