@@ -31,7 +31,19 @@ class Director:
             image_generator=ImageGenerator(),
             audio_manager=AudioManager(music_dir=MUSIC_DIR))
 
-        game_flow = [SetupController, LoadingController, TitleController, TextDumpController, LoadingController, CutsceneController, BattleController, CutsceneController]
+        game_flow = [
+            SetupController,
+            LoadingController,
+            TitleController,
+            TextDumpController,
+            LoadingController,
+            CutsceneController,
+            BattleController,
+            CutsceneController,
+            TitleController
+        ]
+
+        self.num_stages = len(game_flow)
         self.scene_iter = iter(game_flow)
         self.current_scene = None
         self.stage_count = 0
@@ -93,6 +105,11 @@ class Director:
                 print('create_background prologue')
                 prologue_prompt = self.state.story_teller.prologue_card_prompt
                 self.state.image_generator.create_background('prologue', prologue_prompt)
+
+                self.state.story_teller.create_battle_card_prompt()
+                print('create_background battle')
+                background_prompt = self.state.story_teller.battle_card_prompt
+                self.state.image_generator.create_background('battle', background_prompt)
 
                 # TODO: move to end content
                 print('create_background epilogue-victory')
@@ -159,10 +176,16 @@ class Director:
             # Wait for the final content to generate
             self.state.ending_content_future.result()
 
+        kwargs = {}
+
+        if self.num_stages == self.stage_count:
+            kwargs = {'ending':True}
+
         callback = self.advance_game_flow
+
         try:
             args = (self.state, callback)
-            self.current_scene = next(self.scene_iter)(*args)
+            self.current_scene = next(self.scene_iter)(*args, **kwargs)
             self.window.clear()
             self.window.show_view(self.current_scene.view)
         except StopIteration:

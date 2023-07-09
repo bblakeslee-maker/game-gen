@@ -42,15 +42,15 @@ class BattleView(arcade.View):
         self.current_panel = 0  # Initial panel is 0 (main actions panel)
 
     def on_show_view(self):
-        self.background = arcade.load_texture(":resources:images/cybercity_background/far-buildings.png")
-        # arcade.set_background_color(arcade.color.WHITE)
+        background_path = self.state.image_generator.get_background('battle')
+        self.background = arcade.load_texture(background_path)
+
 
     def on_draw(self):
         self.clear()
 
 
         player_image = self.state.image_generator.get_portrait(self.state.story_teller.player_name)
-
         arcade.draw_lrwh_rectangle_textured(0, 0, self.width, self.height, self.background)
 
         player_attacks = ["Tackle", "Shoot", "Spit", "Embezzlement"]
