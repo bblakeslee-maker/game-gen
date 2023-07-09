@@ -18,7 +18,6 @@ class Portrait(arcade.Section):
         self.is_open = False
 
     def open(self, background):
-        print("open")
         self.background = background
         self.is_open = True
 
