@@ -1,8 +1,9 @@
 import arcade
 from ..game_types import GameState
 
-import game.dialog_box as dialog_box
-from game.scenes.cutscene import Background
+from game.drawable import Drawable
+from game.mouse_section import MouseSection
+from game.background import Background
 
 class Darkness(arcade.Section):
     def __init__(self, left, bottom, width, height, **kwargs):
@@ -11,17 +12,13 @@ class Darkness(arcade.Section):
         self.bottom = bottom
         self.width = width
         self.height = height
-        self.background = dialog_box.Drawable(color = [0, 0, 0, 160])
+        self.background = Drawable(color = [0, 0, 0, 160])
 
     def set_callback(self, callback):
         self.callback = callback
 
     def on_draw(self):
         self.background.draw(self.left, self.bottom, self.width, self.height)
-
-    def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
-        if self.callback != None:
-            self.callback()
 
 class TitleText(arcade.Section):
     def __init__(self, left, bottom, width, height, **kwargs):
@@ -51,10 +48,6 @@ class TitleText(arcade.Section):
                 width=self.width - 2 * self.padding,
                 align="center")
 
-    def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
-        if self.callback != None:
-            self.callback()
-
 class TitleView(arcade.View):
     def __init__(self, state: GameState, is_done_callback):
         super().__init__()
@@ -66,6 +59,12 @@ class TitleView(arcade.View):
         self.time_elapsed = 0
         self.done_waiting = False
 
+        self.mouse_section = MouseSection(0,
+                                          0,
+                                          self.width,
+                                          self.height,
+                                          on_mouse_press=lambda: self.dialog_next())
+
         self.bg_section = Background(0,
                                      0,
                                      self.width,
@@ -75,19 +74,17 @@ class TitleView(arcade.View):
                                          0,
                                          self.width,
                                          self.height)
-        self.darkness_section.set_callback(lambda: self.dialog_next())
 
         self.title_section = TitleText(0,
                                        0,
                                        self.width,
                                        self.height)
-
-        self.title_section.set_callback(lambda: self.dialog_next())
         self.title_section.content = self.state.story_teller.title
 
         background_path = self.state.image_generator.get_background('title-card')
 
-        self.bg_section.open(dialog_box.Drawable(texture = arcade.load_texture(background_path)))
+        self.bg_section.open(Drawable(texture = arcade.load_texture(background_path)))
+        self.section_manager.add_section(self.mouse_section)
         self.section_manager.add_section(self.bg_section)
         self.section_manager.add_section(self.darkness_section)
         self.section_manager.add_section(self.title_section)
@@ -95,18 +92,13 @@ class TitleView(arcade.View):
     def on_update(self, delta_time: float):
         self.time_elapsed += delta_time
 
-        if self.time_elapsed > 3.0:
+        if self.time_elapsed > 1.0:
             self.done_waiting = True
-            self.done()
 
     def on_draw(self):
         arcade.start_render()
 
     def dialog_next(self):
-        if self.done_waiting:
-            self.done()
-
-    def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         if self.done_waiting:
             self.done()
 

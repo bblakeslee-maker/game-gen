@@ -1,6 +1,8 @@
 import arcade
 from ..game_types import GameState
 
+from game.background import Background
+
 import game.dialog_box as dialog_box
 
 class CutsceneEvent():
@@ -9,18 +11,6 @@ class CutsceneEvent():
         self.portrait = portrait
         self.portrait_side = side
         self.background = background
-
-class Background(arcade.Section):
-    def __init__(self, left, bottom, width, height, **kwargs):
-        super().__init__(left, bottom, width, height, **kwargs)
-        self.background = dialog_box.Drawable(color = arcade.color.BLACK)
-
-    def open(self, background):
-        self.background = background
-
-    def on_draw(self):
-        self.background.draw(self.left, self.bottom, self.width, self.height)
-
 
 class Portrait(arcade.Section):
     def __init__(self, left, bottom, width, height, **kwargs):
