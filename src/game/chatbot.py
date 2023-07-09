@@ -44,13 +44,14 @@ class StoryTeller:
         self.select_story_genre()
         self.select_artistic_tone()
         self.create_prologue()
+        self.create_title()
+        self.create_title_card_prompt()
         self.create_main_character()
         self.create_final_boss()
         self.create_prologue_dialogue()
         self.create_endings()
         self.create_epilogue_dialogue()
         self.create_story_card_prompts()
-        self.create_title()
 
     def select_story_genre(self):
         payload = [
@@ -206,18 +207,20 @@ class StoryTeller:
         ]
         self.epilogue_defeat = self.invoke_chatgpt(payload)
 
-    def create_story_card_prompts(self):
+    def create_title_card_prompt(self):
         payload = [
             {'role': 'system',
-             'content': self.prologue + '  ' + self.main_character_description + '  ' + self.final_boss_description},
-            {'role': 'user', 'content': f'Describe a title image for this story, featuring the '
-                                        f'characters {self.player_name} and {self.final_boss_name}.  '
+             'content': f'The title is {self.title}, a story about {self.prologue}, with a genre {self.genre}, '
+                        f'in a tone {self.tone}.'},
+            {'role': 'user', 'content': f'Describe a title image for this story.'
                                         f'Use a list of five phrases, each five words or less.  ' +
-                                        self.PROMPT_FORMATTING + f'Do not refer to {self.player_name} or '
-                                                                 f'{self.final_boss_name}, only describe the image.'}
+                                        self.PROMPT_FORMATTING + f'Only describe the image, '
+                                                                 f'do not refer to the characters.'}
         ]
         temp = self.invoke_chatgpt(payload)
         self.title_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
+
+    def create_story_card_prompts(self):
         payload = [
             {'role': 'system', 'content': self.prologue},
             {'role': 'user', 'content': f'Describe the scene depicted in this plot, in five phrases,'
