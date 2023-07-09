@@ -190,7 +190,7 @@ class ImageGenerator:
         if file_name.exists():
             return str(file_name)
 
-        pos_prompt = self.image_objects[name].descriptors
+        pos_prompt = ['landscape', 'environment'] + self.image_objects[name].descriptors
         neg_prompt = ['people', 'characters', 'humans', 'crowd', 'person'] + self.image_objects[name].negative_prompts
 
         pos_prompt = ','.join(pos_prompt)
