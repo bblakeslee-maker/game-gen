@@ -48,7 +48,7 @@ class Director:
 
             # Create boss image
             character_prompt = self.state.story_teller.final_boss_prompt
-            self.state.image_generator.create_character('Boss', character_prompt, no_bg=True)
+            self.state.image_generator.create_character(self.state.story_teller.final_boss_name, character_prompt, no_bg=True)
 
             print('Generating prologue card....')
             prologue_prompt = self.state.story_teller.prologue_card_prompt
