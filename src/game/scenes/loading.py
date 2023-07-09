@@ -1,7 +1,29 @@
+import random
 import arcade
 from ..game_types import GameState
 
 import game.dialog_box as dialog_box
+
+
+TOOLTIPS = [
+    "Don't forget to breathe. Your character needs oxygen to survive.",
+    "If you see an enemy, try attacking it. It might just work.",
+    "Water is wet. Don't drown.",
+    "If you're low on health, try using a healing item. It's like magic!",
+    "Remember to save your game. You never know what might happen.",
+    "If you're lost, try using a map. It's like having directions!",
+    "Don't forget to equip weapons and armor. It might help you survive.",
+    "If you're hungry, try eating food. Your character needs sustenance to function.",
+    "If you're stuck, try talking to NPCs. They might have useful information.",
+    "If you're tired, try resting. Your character needs sleep to regain energy.",
+    "If you see a dragon, don't panic. Just remember to bring a lot of fire extinguishers.",
+    "If you're feeling brave, try fighting a boss with your eyes closed. It's like playing on hard mode!",
+    "If you're feeling lucky, try jumping off a cliff. Who knows, you might find a secret treasure at the bottom.",
+    "If you're feeling lost, try asking the nearest NPC for directions. Just don't expect them to be helpful.",
+    "If you're feeling bored, try talking to your party members. They might have some juicy gossip to share."
+]
+random.shuffle(TOOLTIPS)
+
 
 class LoadingView(arcade.View):
     def __init__(self, state: GameState, is_done_callback):
@@ -11,7 +33,9 @@ class LoadingView(arcade.View):
         self.width = state.window_size[0]
         self.height = state.window_size[1]
 
-        self.content = "Loading..."
+        self.content = "Generating world..."
+        self.content += "\n" * 10
+        self.content += TOOLTIPS[0]
 
         # Add sections for each of the areas:
         self.dialog_section = dialog_box.DialogBox(0,
@@ -24,6 +48,7 @@ class LoadingView(arcade.View):
         self.section_manager.add_section(self.dialog_section)
 
         self.dialog_section.open([self.content])
+        self.time_elapsed = 0
 
     def dialog_next(self):
         self.dialog_section.next()
@@ -32,7 +57,10 @@ class LoadingView(arcade.View):
 
 
     def on_update(self, delta_time: float):
-        self.done()
+        self.time_elapsed += delta_time
+        if self.time_elapsed > 2.:
+            self.done()
+
 
     def on_draw(self):
         arcade.start_render()
