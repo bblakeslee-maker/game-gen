@@ -5,7 +5,7 @@ import dotenv
 import os
 import openai
 
-# from .utils import persistent_cache
+from .utils import persistent_cache
 
 dotenv.load_dotenv()
 
@@ -29,7 +29,7 @@ class StoryTeller:
                                  'until you generate enough dialogue.'
         self.MODEL = 'gpt-3.5-turbo'
 
-    # @persistent_cache(STORY_CACHE)
+    @persistent_cache(STORY_CACHE)
     def invoke_chatgpt(self, payload):
         response = openai.ChatCompletion.create(model=self.MODEL, messages=payload)
         return response.choices[0].message.content
@@ -38,14 +38,15 @@ class StoryTeller:
         self.player_name = name
         self.player_job = occupation
         self.player_misc = extra_info
+        self.EXTRA_CONTEXT = f'This is extra context about the main character {self.player_name}: "{self.player_misc}"'
 
     def generate_story(self):
         self.select_story_genre()
         self.select_artistic_tone()
         self.create_prologue()
+        self.create_main_character()
         self.create_final_boss()
         self.create_prologue_dialogue()
-        self.create_main_character()
         self.create_endings()
         self.create_epilogue_dialogue()
         self.create_story_card_prompts()
@@ -65,6 +66,7 @@ class StoryTeller:
     def create_prologue(self):
         payload = [
             {'role': 'system', 'content': self.BASE_PROMPT},
+            {'role': 'context', 'content': self.EXTRA_CONTEXT},
             {'role': 'user',
              'content': f'{self.player_name} is a {self.player_job} in a {self.genre} story '
                         f'with a {self.tone} style.  Write a single paragraph prologue for the story.'}
@@ -187,6 +189,7 @@ class StoryTeller:
         payload = [
             {'role': 'system',
              'content': self.BASE_PROMPT + ' ' + self.prologue + ' ' + self.final_boss_description},
+            {'role': 'context', 'content': self.EXTRA_CONTEXT},
             {'role': 'user', 'content': f'Write a single paragraph ending for this {self.genre} '
                                         f'story with {self.tone} tone, assuming that {self.player_name} is victorious.'
                                         f'Do not make a list of paragraphs.'}
@@ -195,6 +198,7 @@ class StoryTeller:
         payload = [
             {'role': 'system',
              'content': self.BASE_PROMPT + ' ' + self.prologue + ' ' + self.final_boss_description},
+            {'role': 'context', 'content': self.EXTRA_CONTEXT},
             {'role': 'user', 'content': f'Write a single paragraph ending for this {self.genre} '
                                         f'story with {self.tone} tone, assuming that {self.player_name} loses the fight.'
                                         f'Do not make a list of paragraphs.'}
