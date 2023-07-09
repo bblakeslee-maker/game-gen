@@ -54,6 +54,13 @@ class Director:
             prologue_prompt = self.state.story_teller.prologue_card_prompt
             self.state.image_generator.create_background('prologue', prologue_prompt)
 
+            epilogue_victory_prompt = self.state.story_teller.epilogue_victory_card_prompt
+            self.state.image_generator.create_background('epilogue-victory', epilogue_victory_prompt)
+
+            epilogue_defeat_prompt = self.state.story_teller.epilogue_defeat_card_prompt
+            self.state.image_generator.create_background('epilogue-defeat', epilogue_defeat_prompt)
+
+
 
         callback = self.advance_game_flow
         try:

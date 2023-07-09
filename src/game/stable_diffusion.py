@@ -102,17 +102,17 @@ class ImageGenerator:
 
         self.portrait_prompts = [
             'full color'
-            'green screen background'
             'portrait',
             'head-shot',
             'face',
             'chest-up'
+            'green screen background'
         ]
 
         self.full_body_prompts = [
             'full color'
-            'green screen background',
             'full-body shot',
+            'green screen background',
         ]
 
         override_settings = {
@@ -171,8 +171,8 @@ class ImageGenerator:
         pos_prompt = self.image_objects[name].descriptors
         neg_prompt = self.image_objects[name].negative_prompts
 
-        pos_prompt = ', '.join(pos_prompt)
-        neg_prompt = ', '.join(neg_prompt)
+        pos_prompt = ','.join(pos_prompt)
+        neg_prompt = ','.join(neg_prompt)
 
         payload = {
             'prompt': pos_prompt,
@@ -187,7 +187,12 @@ class ImageGenerator:
         request_data = requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/txt2img", json=payload)
         request_data = request_data.json()
 
-        img = request_data['images'][0]
+        try:
+            img = request_data['images'][0]
+        except:
+            print(request_data)
+
+
         img = Image.open(io.BytesIO(base64.b64decode(img.split(",",1)[0])))
         img.save(file_name)
 
