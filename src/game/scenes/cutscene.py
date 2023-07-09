@@ -106,12 +106,12 @@ class CutsceneView(arcade.View):
                 side = 1 - side
 
             if character not in character_portrait:
-                char_name = 'Bob' if character_side[character] == 0 else 'Boss'
+                char_name = self.state.story_teller.player_name if character_side[character] == 0 else 'Boss'
                 portrait_texture = self.state.image_generator.get_portrait(char_name)
                 character_portrait[character] = arcade.load_texture(portrait_texture)
 
             events.append(CutsceneEvent(
-                [text],
+                [line],
                 dialog_box.Drawable(texture = character_portrait[character]),
                 character_side[character],
                 dialog_box.Drawable(color = arcade.color.GREEN)
