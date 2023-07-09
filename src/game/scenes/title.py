@@ -18,11 +18,12 @@ class TitleView(arcade.View):
         self.done_waiting = True #False
 
         self.bg_section = Background(0,
-                                     self.height,
+                                     0,
                                      self.width,
                                      self.height)
 
         background_path = self.state.image_generator.get_background('title-card')
+        print(background_path)
 
         self.bg_section.open(dialog_box.Drawable(texture = arcade.load_texture(background_path)))
         self.section_manager.add_section(self.bg_section)

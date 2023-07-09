@@ -55,6 +55,8 @@ class Director:
             print("create_title")
             self.state.story_teller.create_title()
 
+            self.state.story_teller.create_title_card_prompt()
+
             print('create_background title card')
             title_prompt = self.state.story_teller.title_card_prompt
             self.state.image_generator.create_background('title-card', title_prompt)
