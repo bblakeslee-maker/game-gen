@@ -5,16 +5,26 @@
 4) Create character class to store the "likeness" of a character
     - Store the character description, negative prompts, T pose (front and back), and attack types
 '''
-import numpy as np
-from PIL import Image
-import requests
 import io
 import base64
-from typing import List, Dict
+import requests
+import numpy as np
+from PIL import Image
 from tqdm import tqdm
+from io import BytesIO
 from pathlib import Path
+from typing import List, Dict
+import plotly.express as px
+import cv2
 
 SD_SERVER_IP = '172.30.0.94'
+
+
+CACHE_DIR = Path('/tmp/gamegen_img_cache')
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+POSE_DIR = Path(__file__).parent / 'poses'
+assert POSE_DIR.exists(), f"Can't find pose img dir: {POSE_DIR}"
 
 
 class Character:
@@ -32,10 +42,10 @@ class Character:
         negative_prompts=None,
         attack_types=None,
         attack_sprites=None,
-        cache:Path = Path('cache')
     ):
 
-        self.cache = cache
+        self.cache = CACHE_DIR
+        self.poses = POSE_DIR
         self.descriptors = descriptors
         self.front_pose = front_pose
         self.back_pose = back_pose
@@ -63,8 +73,10 @@ class Character:
         if attack_type not in self.attack_types:
             self.attack_types[attack_type] = attack_sprite
 
+
 class ImageGenerator:
-    def __init__(self, cache:Path = Path('cache')):
+    def __init__(self):
+
         self.characters: Dict[str, Character] = {}
         self.negative_prompts = [
             'bad anatomy',
@@ -99,8 +111,8 @@ class ImageGenerator:
             'steps': 50
         }
 
-        self.cache = cache
-        self.cache.mkdir(exist_ok=True, parents=True)
+        self.cache = CACHE_DIR
+        self.poses = POSE_DIR
 
         for file in self.cache.glob('*.png'):
             file.unlink()
@@ -115,8 +127,8 @@ class ImageGenerator:
         else:
             self.characters[name] = Character(
                 descriptors = descriptors,
-                negative_prompts = self.negative_prompts,
-                cache=self.cache)
+                negative_prompts = self.negative_prompts
+            )
 
             self.get_portrait(name)
 
@@ -207,6 +219,13 @@ class ImageGenerator:
         pos_prompt = ','.join(pos_prompt)
         neg_prompt = ','.join(neg_prompt)
 
+
+        # Seed controlnet
+        pose_file_name = self.poses / f'3_4th_profile_pose' / 'source_img.png'
+        pose_img = cv2.imread(str(pose_file_name))
+        _, bytes = cv2.imencode('.png', pose_img)
+        pose_img = base64.b64encode(bytes).decode('utf-8')
+
         payload = {
             'prompt': pos_prompt,
             'negative_prompt': neg_prompt,
@@ -214,7 +233,18 @@ class ImageGenerator:
             'restore_faces': True,
             'batch_size': 1,
             'denoising_strength': 0.7,
-            'hr_upscaler': "Nearest"
+            'hr_upscaler': "Nearest",
+            "alwayson_scripts": {
+                "controlnet":{
+                    "args":[
+                        {
+                        "input_image": pose_img,
+                        'module': 'openpose',
+                        "model": "control_v11p_sd15_openpose [cab727d4]"
+                        }
+                    ]
+                }
+            }
         }
 
         print('Generating images')
