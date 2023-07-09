@@ -14,12 +14,12 @@ class TitleView(arcade.View):
         self.content = self.state.story_teller.title
 
         self.time_elapsed = 0
-        self.done_waiting = False
+        self.done_waiting = True #False
 
     def on_update(self, delta_time: float):
         self.time_elapsed += delta_time
 
-        if self.time_elapsed > 20.0:
+        if self.time_elapsed > 5.0:
             self.done_waiting = True
 
     def on_draw(self):

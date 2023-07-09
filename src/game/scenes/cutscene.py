@@ -61,6 +61,7 @@ class CutsceneView(arcade.View):
                                                    self.width,
                                                    self.dialog_height)
         self.dialog_section.set_callback(lambda: self.dialog_next())
+        self.dialog_section.char_per_frame = -1
 
         self.left_char_portrait_section = Portrait(0,
                                                    self.dialog_section.height,

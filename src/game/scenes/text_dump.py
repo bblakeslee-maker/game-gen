@@ -19,6 +19,7 @@ class TextDumpView(arcade.View):
                                                    self.width,
                                                    self.height)
         self.dialog_section.set_callback(lambda: self.dialog_next())
+        self.dialog_section.char_per_frame = -1
 
         self.section_manager.add_section(self.dialog_section)
 
