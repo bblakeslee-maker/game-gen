@@ -85,15 +85,7 @@ class Director:
                 print("create_prologue_dialogue")
                 self.state.story_teller.create_prologue_dialogue()
 
-                # TODO: move to end content
-                print("create_endings")
-                self.state.story_teller.create_endings()
-                print("create_epilogue_dialogue")
-                self.state.story_teller.create_epilogue_dialogue()
-                print("create_story_card_prompts")
-                self.state.story_teller.create_story_card_prompts()
 
-                print("Generating images....")
                 print('create_character hero')
                 character_prompt = self.state.story_teller.main_character_prompt
                 self.state.image_generator.create_character(name, character_prompt, no_bg=True)
@@ -103,6 +95,7 @@ class Director:
                 self.state.image_generator.create_character(self.state.story_teller.final_boss_name, character_prompt, no_bg=True)
 
                 print('create_background prologue')
+                self.state.story_teller.create_prologue_card_prompt()
                 prologue_prompt = self.state.story_teller.prologue_card_prompt
                 self.state.image_generator.create_background('prologue', prologue_prompt)
 
@@ -112,31 +105,28 @@ class Director:
                 self.state.image_generator.create_background('battle', background_prompt)
 
                 # TODO: move to end content
-                print('create_background epilogue-victory')
-                epilogue_victory_prompt = self.state.story_teller.epilogue_victory_card_prompt
-                self.state.image_generator.create_background('epilogue-victory', epilogue_victory_prompt)
 
-                print('create_background epilogue-defeat')
-                epilogue_defeat_prompt = self.state.story_teller.epilogue_defeat_card_prompt
-                self.state.image_generator.create_background('epilogue-defeat', epilogue_defeat_prompt)
 
             self.state.story_generation_future = self.executor.submit(content_in_the_background)
 
 
             def final_content_in_background():
-                pass
-                # print("create_endings")
-                # self.state.story_teller.create_endings()
-                # print("create_epilogue_dialogue")
-                # self.state.story_teller.create_epilogue_dialogue()
-                # print("create_story_card_prompts")
-                # self.state.story_teller.create_story_card_prompts()
-                #
-                # epilogue_victory_prompt = self.state.story_teller.epilogue_victory_card_prompt
-                # self.state.image_generator.create_background('epilogue-victory', epilogue_victory_prompt)
-                #
-                # epilogue_defeat_prompt = self.state.story_teller.epilogue_defeat_card_prompt
-                # self.state.image_generator.create_background('epilogue-defeat', epilogue_defeat_prompt)
+
+                print("create_endings")
+                self.state.story_teller.create_endings()
+                print("create_epilogue_dialogue")
+                self.state.story_teller.create_epilogue_dialogue()
+
+                print('create_background epilogue-victory')
+                self.state.story_teller.create_epilogue_victory_card_prompt()
+                epilogue_victory_prompt = self.state.story_teller.epilogue_victory_card_prompt
+                self.state.image_generator.create_background('epilogue-victory', epilogue_victory_prompt)
+
+                print('create_background epilogue-defeat')
+                self.state.story_teller.create_epilogue_defeat_card_prompt()
+                epilogue_defeat_prompt = self.state.story_teller.epilogue_defeat_card_prompt
+                self.state.image_generator.create_background('epilogue-defeat', epilogue_defeat_prompt)
+
 
             self.state.ending_content_future = self.executor.submit(final_content_in_background)
 

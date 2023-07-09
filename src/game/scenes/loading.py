@@ -6,6 +6,7 @@ import game.dialog_box as dialog_box
 
 
 TOOLTIPS = [
+    "Somewhere out there, there's a server doing it's best just for you.",
     "Don't forget to breathe. Your character needs oxygen to survive.",
     "If you see an enemy, try attacking it. It might just work.",
     "Water is wet. Don't drown.",
@@ -22,7 +23,6 @@ TOOLTIPS = [
     "If you're feeling lost, try asking the nearest NPC for directions. Just don't expect them to be helpful.",
     "If you're feeling bored, try talking to your party members. They might have some juicy gossip to share."
 ]
-random.shuffle(TOOLTIPS)
 
 
 class LoadingView(arcade.View):
@@ -35,7 +35,7 @@ class LoadingView(arcade.View):
 
         self.content = "Generating world..."
         self.content += "\n" * 10
-        self.content += TOOLTIPS[0]
+        self.content += random.choice(TOOLTIPS)
 
         # Add sections for each of the areas:
         self.dialog_section = dialog_box.DialogBox(0,

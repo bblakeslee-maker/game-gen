@@ -232,7 +232,7 @@ class StoryTeller:
         temp = self.invoke_chatgpt(payload)
         self.battle_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
 
-    def create_story_card_prompts(self):
+    def create_prologue_card_prompt(self):
         payload = [
             {'role': 'system', 'content': self.prologue},
             {'role': 'user', 'content': f'Describe the scene depicted in this plot, in five phrases,'
@@ -243,6 +243,7 @@ class StoryTeller:
         temp = self.invoke_chatgpt(payload)
         self.prologue_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
 
+    def create_epilogue_victory_card_prompt(self):
         payload = [
             {'role': 'system', 'content': self.epilogue_victory},
             {'role': 'user', 'content': f'Describe the scene depicted in this plot, in five phrases,'
@@ -253,6 +254,7 @@ class StoryTeller:
         temp = self.invoke_chatgpt(payload)
         self.epilogue_victory_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
 
+    def create_epilogue_defeat_card_prompt(self):
         payload = [
             {'role': 'system', 'content': self.epilogue_defeat},
             {'role': 'user', 'content': f'Describe the scene depicted in this plot, in five phrases,'
