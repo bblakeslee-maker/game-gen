@@ -151,7 +151,7 @@ class ImageGenerator:
 
         requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/options", json=override_settings)
 
-    def create_character(self, name:str, description:str, no_bg:bool=False):
+    def create_character(self, name:str, description:str, no_bg:bool=False, look_right=False):
         descriptors = description.split(',')
         seed = random.randint(0, SEED_MAX)
 
@@ -164,7 +164,7 @@ class ImageGenerator:
                 seed = seed,
             )
 
-            self.get_portrait(name, no_bg=no_bg)
+            self.get_portrait(name, no_bg=no_bg, look_right=look_right)
 
     def create_background(self, name:str, description:str):
         descriptors = description.split(',')
@@ -241,17 +241,17 @@ class ImageGenerator:
 
         return request_data['image']
 
-    def get_portrait(self, name:str, no_bg:bool=False)->str:
+    def get_portrait(self, name:str, no_bg:bool=False, look_right=False)->str:
         file_path = self.cache / f'{name}_portrait.png'
 
         if not file_path.exists():
-            img = self.create_portrait(name, no_bg=no_bg)
+            img = self.create_portrait(name, no_bg=no_bg, look_right=look_right)
             img.save(str(file_path))
 
         return str(file_path)
 
     @retry(3, [KeyError, requests.exceptions.ConnectTimeout])
-    def create_portrait(self, name:str, no_bg:bool=False):
+    def create_portrait(self, name:str, no_bg:bool=False, look_right=False):
         if name not in self.image_objects:
             print(f'Character does not exist: {name}')
             return
@@ -268,6 +268,9 @@ class ImageGenerator:
         # Seed controlnet
         pose_file_name = random.choice(self.poses)
         pose_img = cv2.imread(str(pose_file_name))
+        if look_right:
+            pose_img = cv2.flip(pose_img, 1)
+
         _, bytes = cv2.imencode('.png', pose_img)
         pose_img = base64.b64encode(bytes).decode('utf-8')
 

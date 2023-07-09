@@ -88,7 +88,7 @@ class Director:
 
                 print('create_character hero')
                 character_prompt = self.state.story_teller.main_character_prompt
-                self.state.image_generator.create_character(name, character_prompt, no_bg=True)
+                self.state.image_generator.create_character(name, character_prompt, no_bg=True, look_right=True)
 
                 print('create_character boss')
                 character_prompt = self.state.story_teller.final_boss_prompt

@@ -50,7 +50,7 @@ class BattleView(arcade.View):
         self.clear()
 
 
-        player_image = self.state.image_generator.get_portrait(self.state.story_teller.player_name)
+        player_image = self.state.image_generator.get_portrait(self.state.story_teller.player_name, look_right=True)
         arcade.draw_lrwh_rectangle_textured(0, 0, self.width, self.height, self.background)
 
         player_attacks = ["Tackle", "Shoot", "Spit", "Embezzlement"]
