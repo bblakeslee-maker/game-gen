@@ -145,9 +145,9 @@ class StoryTeller:
 
     def create_final_boss(self):
         payload = [
-            {'role': 'system', 'content': f'The story is "{self.prologue}".  The hero of the story is '
+            {'role': 'system', 'content': f'The story is "{self.prologue}".  The protagonist of the story is '
                                           f'{self.player_name}, who is {self.main_character_description}.'},
-            {'role': 'user', 'content': f'Describe the appearance of a final boss that '
+            {'role': 'user', 'content': f'Describe the appearance of an antagonist that '
                                         f'{self.player_name} the {self.player_job} '
                                         f'needs to fight in one paragraph.'}
         ]
