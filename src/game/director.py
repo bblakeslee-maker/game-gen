@@ -50,6 +50,10 @@ class Director:
             character_prompt = self.state.story_teller.final_boss_prompt
             self.state.image_generator.create_character('Boss', character_prompt)
 
+            print('Generating prologue card....')
+            prologue_prompt = self.state.story_teller.prologue_card_prompt
+            self.state.image_generator.create_background('prologue', prologue_prompt)
+
 
         callback = self.advance_game_flow
         try:
@@ -64,4 +68,3 @@ class Director:
 
     def start_game(self):
         self.advance_game_flow()
-

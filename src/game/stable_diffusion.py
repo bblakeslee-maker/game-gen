@@ -25,7 +25,7 @@ POSE_DIR = Path(__file__).parent / 'poses'
 assert POSE_DIR.exists(), f"Can't find pose img dir: {POSE_DIR}"
 
 
-class Character:
+class ImageObject:
     descriptors: List[str]
     front_pose: np.ndarray
     back_pose: np.ndarray
@@ -75,7 +75,7 @@ class Character:
 class ImageGenerator:
     def __init__(self):
 
-        self.characters: Dict[str, Character] = {}
+        self.image_objects: Dict[str, ImageObject] = {}
         self.negative_prompts = [
             'bad anatomy',
             'amputations',
@@ -91,6 +91,7 @@ class ImageGenerator:
 
         self.portrait_prompts = [
             'full color'
+            'green screen background'
             'portrait',
             'head-shot',
             'face',
@@ -99,6 +100,7 @@ class ImageGenerator:
 
         self.full_body_prompts = [
             'full color'
+            'green screen background',
             'full-body shot',
         ]
 
@@ -120,24 +122,72 @@ class ImageGenerator:
     def create_character(self, name:str, description:str):
         descriptors = description.split(',')
 
-        if name in self.characters:
+        if name in self.image_objects:
             print('Character already exists. Skipping.')
         else:
-            self.characters[name] = Character(
+            self.image_objects[name] = ImageObject(
                 descriptors = descriptors,
                 negative_prompts = self.negative_prompts
             )
 
             self.get_portrait(name)
 
+    def create_background(self, name:str, description:str):
+        descriptors = description.split(',')
+
+        if name in self.image_objects:
+            print(f'Background {name} already exists. Skipping.')
+        else:
+            self.image_objects[name] = ImageObject(
+                descriptors = descriptors,
+                negative_prompts = self.negative_prompts
+            )
+
+            self.get_background(name)
+
+    def get_background(self, name:str):
+        if name not in self.image_objects:
+            print(f'Background {name} does not exist')
+            return
+
+        file_name = self.cache / f'{name}.png'
+
+        if file_name.exists():
+            return str(file_name)
+
+        pos_prompt = self.image_objects[name].descriptors
+        neg_prompt = self.image_objects[name].negative_prompts
+
+        pos_prompt = ','.join(pos_prompt)
+        neg_prompt = ','.join(neg_prompt)
+
+        payload = {
+            'prompt': pos_prompt,
+            'negative_prompt': neg_prompt,
+            'steps': 50,
+            'batch_size': 1,
+            'denoising_strength': 0.7,
+            'hr_upscaler': "Nearest",
+            'model': 'DPM++2M'
+        }
+
+        request_data = requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/txt2img", json=payload)
+        request_data = request_data.json()
+
+        img = request_data['images'][0]
+        img = Image.open(io.BytesIO(base64.b64decode(img.split(",",1)[0])))
+        img.save(file_name)
+
+        return file_name
+
     def modify_character(self, name, description:str):
         descriptors = description.split(',')
 
-        if name not in self.characters:
-            print('Character has not been created. Skipping')
+        if name not in self.image_objects:
+            print(f'Character {name} has not been created. Skipping')
         else:
             for descriptor in descriptors:
-                self.characters[name].add_descriptor(descriptor)
+                self.image_objects[name].add_descriptor(descriptor)
 
     def remove_bg(self, image:str):
         payload = {
@@ -155,19 +205,35 @@ class ImageGenerator:
 
         return request_data['image']
 
+    def get_full_body(self, name:str)->str:
+        file_path = self.cache / f'{name}_full_body.png'
+
+        if not file_path.exists():
+            img = self.create_full_body(name)
+            img.save(str(file_path))
+
+        return str(file_path)
+
     def create_full_body(self, name:str, no_bg:bool=False):
-        if name not in self.characters:
+        if name not in self.image_objects:
             print(f'Character does not exist: {name}')
             return
 
-        pos_prompt = self.characters[name].descriptors
-        neg_prompt = self.characters[name].negative_prompts
+        pos_prompt = self.image_objects[name].descriptors
+        neg_prompt = self.image_objects[name].negative_prompts
 
-        pos_prompt = self.full_body_prompts + pos_prompt + ['plain background']
+        pos_prompt = self.full_body_prompts + pos_prompt
         neg_prompt =  neg_prompt + ['missing torso', 'missing legs', 'missing arms', 'noisy background']
 
         pos_prompt = ','.join(pos_prompt)
         neg_prompt = ','.join(neg_prompt)
+
+
+        # Seed controlnet
+        pose_file_name = self.poses / f'full_body_looking_down_pose' / 'source_img.png'
+        pose_img = cv2.imread(str(pose_file_name))
+        _, bytes = cv2.imencode('.png', pose_img)
+        pose_img = base64.b64encode(bytes).decode('utf-8')
 
         payload = {
             'prompt': pos_prompt,
@@ -177,40 +243,47 @@ class ImageGenerator:
             'batch_size': 1,
             'denoising_strength': 0.7,
             'hr_upscaler': "Nearest",
-            'model': 'DPM++2M'
+            "alwayson_scripts": {
+                "controlnet":{
+                    "args":[
+                        {
+                        "input_image": pose_img,
+                        'module': 'openpose',
+                        "model": "control_v11p_sd15_openpose [cab727d4]"
+                        }
+                    ]
+                }
+            }
         }
 
-        print('Generating images')
         request_data = requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/txt2img", json=payload)
         request_data = request_data.json()
 
-        images = []
+        img = request_data['images'][0]
 
-        for img in tqdm(request_data['images']):
-            if no_bg:
-                img = self.remove_bg(img)
+        if no_bg:
+            img = self.remove_bg(img)
 
-            img = Image.open(io.BytesIO(base64.b64decode(img.split(",",1)[0])))
-            images.append(img)
+        img = Image.open(io.BytesIO(base64.b64decode(img.split(",",1)[0])))
 
-        return images
+        return img
 
     def get_portrait(self, name:str)->str:
         file_path = self.cache / f'{name}_portrait.png'
 
         if not file_path.exists():
-            img = self.create_portrait(name)[0]
+            img = self.create_portrait(name)
             img.save(str(file_path))
 
         return str(file_path)
 
     def create_portrait(self, name:str, no_bg:bool=False):
-        if name not in self.characters:
+        if name not in self.image_objects:
             print(f'Character does not exist: {name}')
             return
 
-        pos_prompt = self.characters[name].descriptors
-        neg_prompt = self.characters[name].negative_prompts
+        pos_prompt = self.image_objects[name].descriptors
+        neg_prompt = self.image_objects[name].negative_prompts
 
         pos_prompt = self.portrait_prompts + pos_prompt
 
@@ -245,20 +318,17 @@ class ImageGenerator:
             }
         }
 
-        print('Generating images')
         request_data = requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/txt2img", json=payload)
         request_data = request_data.json()
 
-        images = []
+        img = request_data['images'][0]
 
-        for img in tqdm(request_data['images']):
-            if no_bg:
-                img = self.remove_bg(img)
+        if no_bg:
+            img = self.remove_bg(img)
 
-            img = Image.open(io.BytesIO(base64.b64decode(img.split(",",1)[0])))
-            images.append(img)
+        img = Image.open(io.BytesIO(base64.b64decode(img.split(",",1)[0])))
 
-        return images
+        return img
 
 if __name__ == '__main__':
     '''
