@@ -55,6 +55,10 @@ class Director:
             print("create_title")
             self.state.story_teller.create_title()
 
+            print('create_background title card')
+            title_prompt = self.state.story_teller.title_card_prompt
+            self.state.image_generator.create_background('title-card', title_prompt)
+
             def content_in_the_background():
                 print("create_main_character")
                 self.state.story_teller.create_main_character()
@@ -70,8 +74,6 @@ class Director:
                 self.state.story_teller.create_epilogue_dialogue()
                 print("create_story_card_prompts")
                 self.state.story_teller.create_story_card_prompts()
-
-
 
                 print("Generating images....")
                 print('create_character hero')
