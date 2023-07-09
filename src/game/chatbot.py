@@ -5,9 +5,11 @@ import dotenv
 import os
 import openai
 
+from .utils import persistent_cache
+
 dotenv.load_dotenv()
 
-SYS_PROMPT = 'You are the narrator for an epic fantasy story.'
+STORY_CACHE = 'cache.pkl'
 
 
 class StoryTeller:
@@ -27,18 +29,7 @@ class StoryTeller:
                                  'until you generate enough dialogue.'
         self.MODEL = 'gpt-3.5-turbo'
 
-    # from tenacity import (
-    #     retry,
-    #     stop_after_attempt,
-    #     wait_random_exponential,
-    # )  # for exponential backoff
-    #
-    # @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
-    # def completion_with_backoff(**kwargs):
-    #     return openai.Completion.create(**kwargs)
-    #
-    # completion_with_backoff(model="text-davinci-003", prompt="Once upon a time,")
-
+    @persistent_cache(STORY_CACHE)
     def invoke_chatgpt(self, payload):
         response = openai.ChatCompletion.create(model=self.MODEL, messages=payload)
         return response.choices[0].message.content

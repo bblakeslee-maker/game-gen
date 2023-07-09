@@ -14,7 +14,7 @@ class Director:
     def __init__(self, window: arcade.Window):
         self.window = window
         self.state = GameState(
-            story_teller=StoryTeller(use_chatgpt=False),
+            story_teller=StoryTeller(use_chatgpt=True),
             window_size=window.size,
             is_prologue=True,
             battle_won=False,
