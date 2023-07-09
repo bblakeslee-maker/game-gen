@@ -5,7 +5,7 @@ import dotenv
 import os
 import openai
 
-from .utils import persistent_cache
+# from .utils import persistent_cache
 
 dotenv.load_dotenv()
 
@@ -29,7 +29,7 @@ class StoryTeller:
                                  'until you generate enough dialogue.'
         self.MODEL = 'gpt-3.5-turbo'
 
-    @persistent_cache(STORY_CACHE)
+    # @persistent_cache(STORY_CACHE)
     def invoke_chatgpt(self, payload):
         response = openai.ChatCompletion.create(model=self.MODEL, messages=payload)
         return response.choices[0].message.content
@@ -59,7 +59,8 @@ class StoryTeller:
                         f'information {self.player_misc}, what genre of story '
                         f'should be created?  Respond with a list of three single words.'}
         ]
-        self.genre = self.invoke_chatgpt(payload)
+        temp = self.invoke_chatgpt(payload)
+        self.genre = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace('\n', '')
 
     def create_prologue(self):
         payload = [
@@ -76,8 +77,8 @@ class StoryTeller:
             {'role': 'user',
              'content': 'Describe the visual artistic style and mood of the above story in 3 or 4 words.'}
         ]
-        self.tone = self.invoke_chatgpt(payload)
-
+        temp = self.invoke_chatgpt(payload)
+        self.tone = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace('\n', '')
 
     def create_prologue_dialogue(self):
         payload = [
@@ -202,6 +203,17 @@ class StoryTeller:
 
     def create_story_card_prompts(self):
         payload = [
+            {'role': 'system',
+             'content': self.prologue + '  ' + self.main_character_description + '  ' + self.final_boss_description},
+            {'role': 'user', 'content': f'Describe a title image for this story, featuring the '
+                                        f'characters {self.player_name} and {self.final_boss_name}.  '
+                                        f'Use a list of five phrases, each five words or less.  ' +
+                                        self.PROMPT_FORMATTING + f'Do not refer to {self.player_name} or '
+                                                                 f'{self.final_boss_name}, only describe the image.'}
+        ]
+        temp = self.invoke_chatgpt(payload)
+        self.title_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
+        payload = [
             {'role': 'system', 'content': self.prologue},
             {'role': 'user', 'content': f'Describe the scene depicted in this plot, in five phrases,'
                                         f'each five words or less.  ' + self.PROMPT_FORMATTING +
@@ -252,6 +264,7 @@ def main():
     print('Title: \n' + storyteller.title + '\n')
     print('Genre: \n' + storyteller.genre + '\n')
     print('Tone: \n' + storyteller.tone + '\n')
+    print('Title Prompt: \n' + storyteller.title_card_prompt + '\n')
     print('Prologue: \n' + storyteller.prologue + '\n')
     print('Prologue Dialogue: \n' + storyteller.prologue_dialogue + '\n')
     print('Prologue Prompt: \n' + storyteller.prologue_card_prompt + '\n')
