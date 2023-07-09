@@ -11,10 +11,8 @@ import requests
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
-from io import BytesIO
 from pathlib import Path
 from typing import List, Dict
-import plotly.express as px
 import cv2
 
 SD_SERVER_IP = '172.30.0.94'
