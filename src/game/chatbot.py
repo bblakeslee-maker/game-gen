@@ -48,6 +48,7 @@ class StoryTeller:
         self.create_title_card_prompt()
         self.create_main_character()
         self.create_final_boss()
+        self.create_battle_card_prompt()
         self.create_prologue_dialogue()
         self.create_endings()
         self.create_epilogue_dialogue()
@@ -220,6 +221,17 @@ class StoryTeller:
         temp = self.invoke_chatgpt(payload)
         self.title_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
 
+    def create_battle_card_prompt(self):
+        payload = [
+            {'role': 'system', 'content': self.prologue + ' ' + self.main_character_description + ' ' + self.final_boss_description},
+            {'role': 'user', 'content': f'Describe the battlefield between {self.player_name} '
+                                        f'and {self.final_boss_name} in five phrases, each five words or less. ' +
+                                        self.PROMPT_FORMATTING + f' Do not refer to {self.player_name} or '
+                                                                 f'{self.final_boss_name}, only describe the background.'}
+        ]
+        temp = self.invoke_chatgpt(payload)
+        self.battle_card_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
+
     def create_story_card_prompts(self):
         payload = [
             {'role': 'system', 'content': self.prologue},
@@ -285,6 +297,7 @@ def main():
     print('Boss Prompt: \n' + storyteller.final_boss_prompt + '\n')
     print('Boss Attacks: \n' + storyteller.final_boss_attacks + '\n')
     print('Boss Inventory: \n' + storyteller.final_boss_inventory + '\n')
+    print('Battle Card Prompt: \n' + storyteller.battle_card_prompt + '\n')
     print('Epilogue Victory: \n' + storyteller.epilogue_victory + '\n')
     print('Epilogue Victory Dialogue: \n' + storyteller.epilogue_victory_dialogue + '\n')
     print('Epilogue Victory Prompt: \n' + storyteller.epilogue_victory_card_prompt + '\n')
