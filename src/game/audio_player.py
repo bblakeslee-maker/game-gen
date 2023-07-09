@@ -12,9 +12,7 @@ class AudioManager:
         self.music_index = music_index
 
     def pick_audio_file(self, type:str):
-        print(self.music_index[type])
         file_name = self.music_dir / random.choice(self.music_index[type])
-        print(f'audio file: {file_name}')
         return file_name
 
     def get_intro_music(self):
