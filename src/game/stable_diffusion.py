@@ -171,8 +171,8 @@ class ImageGenerator:
         pos_prompt = self.image_objects[name].descriptors
         neg_prompt = self.image_objects[name].negative_prompts
 
-        pos_prompt = ','.join(pos_prompt)
-        neg_prompt = ','.join(neg_prompt)
+        pos_prompt = ', '.join(pos_prompt)
+        neg_prompt = ', '.join(neg_prompt)
 
         payload = {
             'prompt': pos_prompt,
@@ -238,8 +238,8 @@ class ImageGenerator:
         pos_prompt = self.full_body_prompts + pos_prompt
         neg_prompt =  neg_prompt + ['missing torso', 'missing legs', 'missing arms', 'noisy background']
 
-        pos_prompt = ','.join(pos_prompt)
-        neg_prompt = ','.join(neg_prompt)
+        pos_prompt = ', '.join(pos_prompt)
+        neg_prompt = ', '.join(neg_prompt)
 
 
         # Seed controlnet
@@ -303,8 +303,8 @@ class ImageGenerator:
 
         pos_prompt = self.portrait_prompts + pos_prompt
 
-        pos_prompt = ','.join(pos_prompt)
-        neg_prompt = ','.join(neg_prompt)
+        pos_prompt = ', '.join(pos_prompt)
+        neg_prompt = ', '.join(neg_prompt)
 
 
         # Seed controlnet
