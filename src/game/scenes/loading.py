@@ -25,7 +25,6 @@ class LoadingView(arcade.View):
 
         self.dialog_section.open([self.content])
 
-
     def dialog_next(self):
         self.dialog_section.next()
         if self.dialog_section.finished():
