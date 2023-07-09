@@ -32,8 +32,6 @@ class SetupView(arcade.View):
         self.question_iter = zip(QUESTIONS, DEFAULT_ANSWERS)
         self.question_widget = None
 
-
-
         # # Create a text label
         question, answer = next(self.question_iter)
         self.question_label = arcade.gui.UITextArea(

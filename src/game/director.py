@@ -1,6 +1,6 @@
 import arcade
 import concurrent.futures
-
+from pathlib import Path
 
 from .scenes.battle import BattleController
 from .scenes.cutscene import CutsceneController
@@ -11,7 +11,9 @@ from .scenes.title import TitleController
 from .game_types import GameState
 from .chatbot import StoryTeller
 from .stable_diffusion import ImageGenerator
+from .audio_player import AudioManager
 
+MUSIC_DIR = Path(__file__).parent / 'music'
 
 class Director:
     state: GameState
@@ -19,19 +21,20 @@ class Director:
 
     def __init__(self, window: arcade.Window):
         self.window = window
+
         self.state = GameState(
             story_teller=StoryTeller(use_chatgpt=True),
             window_size=window.size,
             is_prologue=True,
             battle_won=False,
-            image_generator=ImageGenerator())
+            image_generator=ImageGenerator(),
+            audio_manager=AudioManager(music_dir=MUSIC_DIR))
 
         game_flow = [SetupController, LoadingController, TitleController, TextDumpController, LoadingController, CutsceneController, BattleController, CutsceneController]
         self.scene_iter = iter(game_flow)
         self.current_scene = None
         self.stage_count = 0
         self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
-
 
     def advance_game_flow(self):
 
@@ -118,6 +121,34 @@ class Director:
                 # self.state.image_generator.create_background('epilogue-defeat', epilogue_defeat_prompt)
 
             self.state.ending_content_future = self.executor.submit(final_content_in_background)
+
+        if self.stage_count == 3:
+            # play intro music
+            music_file = self.state.audio_manager.get_intro_music()
+            audio = arcade.load_sound(str(music_file),False)
+            self.state.audio_player = arcade.play_sound(audio,1.0,-1,False)
+        elif self.stage_count == 7:
+            # play battle music
+            arcade.stop_sound(self.state.audio_player)
+
+            music_file = self.state.audio_manager.get_battle_music()
+            audio = arcade.load_sound(str(music_file),False)
+            self.state.audio_player = arcade.play_sound(audio,1.0,-1,False)
+        elif self.stage_count == 8:
+            if self.state.battle_won:
+                # play victory music
+                arcade.stop_sound(self.state.audio_player)
+
+                music_file = self.state.audio_manager.get_victory_music()
+                audio = arcade.load_sound(str(music_file),False)
+                self.state.audio_player = arcade.play_sound(audio,1.0,-1,False)
+            else:
+                # play defeat music
+                arcade.stop_sound(self.state.audio_player)
+
+                music_file = self.state.audio_manager.get_defeat_music()
+                audio = arcade.load_sound(str(music_file),False)
+                self.state.audio_player = arcade.play_sound(audio,1.0,-1,False)
 
         if self.stage_count > 5:
             # Wait for the story and images to generate

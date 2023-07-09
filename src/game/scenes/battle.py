@@ -33,7 +33,7 @@ class BattleView(arcade.View):
         super().__init__()
         self.done = is_done_callback
         self.time_elapsed = 0
-        self.state = state
+        self.state:GameState = state
         self.width = state.window_size[0]
         self.height = state.window_size[1]
         self.battle_done = False
@@ -139,7 +139,7 @@ class BattleView(arcade.View):
 
     def on_update(self, delta_time):
         self.time_elapsed += delta_time
-        if self.time_elapsed > 2:
+        if self.time_elapsed > 10:
             self.state.battle_result = bool(random.getrandbits(1))
             print("state.battle_result: " + str(self.state.battle_result))
             self.battle_done = True

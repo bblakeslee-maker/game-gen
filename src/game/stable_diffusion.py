@@ -191,7 +191,7 @@ class ImageGenerator:
             return str(file_name)
 
         pos_prompt = self.image_objects[name].descriptors
-        neg_prompt = self.image_objects[name].negative_prompts
+        neg_prompt = ['people', 'characters', 'humans', 'crowd', 'person'] + self.image_objects[name].negative_prompts
 
         pos_prompt = ','.join(pos_prompt)
         neg_prompt = ','.join(neg_prompt)
