@@ -45,7 +45,7 @@ class BattleView(arcade.View):
     def on_draw(self):
         self.clear()
 
-        player_image = self.state.image_generator.get_portrait('Bob')
+        player_image = self.state.image_generator.get_portrait(self.state.story_teller.player_name)
         self.player_sprite = arcade.Sprite(player_image, PLAYER_SCALING)
         self.player_sprite.center_x = 120
         self.player_sprite.center_y = 320

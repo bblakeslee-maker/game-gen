@@ -3,6 +3,7 @@ from .scenes.battle import BattleController
 from .scenes.cutscene import CutsceneController
 from .scenes.setup import SetupController
 from .scenes.text_dump import TextDumpController
+from .scenes.title import TitleController
 from .game_types import GameState
 from .chatbot import StoryTeller
 from .stable_diffusion import ImageGenerator
@@ -20,7 +21,7 @@ class Director:
             battle_won=False,
             image_generator=ImageGenerator())
 
-        game_flow = [SetupController, TextDumpController, CutsceneController, BattleController, CutsceneController]
+        game_flow = [SetupController, TitleController, TextDumpController, CutsceneController, BattleController, CutsceneController]
         self.scene_iter = iter(game_flow)
         self.current_scene = None
         self.stage_count = 0
@@ -44,7 +45,7 @@ class Director:
             print("Generating images....")
             # Create main character image
             character_prompt = self.state.story_teller.main_character_prompt
-            self.state.image_generator.create_character('Bob', character_prompt, no_bg=True)
+            self.state.image_generator.create_character(name, character_prompt, no_bg=True)
 
             # Create boss image
             character_prompt = self.state.story_teller.final_boss_prompt
