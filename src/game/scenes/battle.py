@@ -28,6 +28,35 @@ DESCRIPTIONS = {
     "Giddy Up": "Command your horse to giddy up.",
 }
 
+
+class HPStatusBar:
+    def __init__(self, max_hp, current_hp, x, y, width, height, background_color, foreground_color, border_color):
+        self.max_hp = max_hp
+        self.current_hp = current_hp
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.background_color = background_color
+        self.foreground_color = foreground_color
+        self.border_color = border_color
+
+    def draw(self):
+
+        margin = 4
+        # Draw the background
+        arcade.draw_xywh_rectangle_filled(self.x-margin, self.y-margin, self.width+margin*2, self.height+margin*2, self.border_color)
+        arcade.draw_xywh_rectangle_filled(self.x, self.y, self.width, self.height, self.background_color)
+
+        # Calculate the width of the foreground based on the current HP
+        foreground_width = (self.current_hp / self.max_hp) * self.width
+
+        # Draw the foreground
+        arcade.draw_xywh_rectangle_filled(self.x, self.y, foreground_width, self.height, self.foreground_color)
+
+    def update(self, current_hp):
+        self.current_hp = current_hp
+
 class BattleView(arcade.View):
     def __init__(self, state, is_done_callback):
         super().__init__()
@@ -40,6 +69,17 @@ class BattleView(arcade.View):
         self.current_main_action_index = 0  # Initial main action index is 0 (Attack)
         self.current_subaction_index = 0  # Initial subaction index is 0 (first action under Attack)
         self.current_panel = 0  # Initial panel is 0 (main actions panel)
+
+        self.player_hp_bar = HPStatusBar(
+            100, 10,
+            0, 200,
+            400, 20,
+            arcade.color.DARK_GRAY, arcade.color.RED, arcade.color.BLACK)
+        self.enemy_hp_bar = HPStatusBar(
+            100, 10,
+            self.width-400, 200,
+            400, 20,
+            arcade.color.DARK_GRAY, arcade.color.RED, arcade.color.BLACK)
 
     def on_show_view(self):
         background_path = self.state.image_generator.get_background('battle')
@@ -68,6 +108,9 @@ class BattleView(arcade.View):
         self.enemy_sprite.center_x = 620
         self.enemy_sprite.center_y = 420
         self.enemy_sprite.draw()
+
+        self.player_hp_bar.draw()
+        self.enemy_hp_bar.draw()
 
         BORDER_THICKNESS = 4  # border thickness in pixels
         for i in range(3):
@@ -139,7 +182,7 @@ class BattleView(arcade.View):
 
     def on_update(self, delta_time):
         self.time_elapsed += delta_time
-        if self.time_elapsed > 10:
+        if self.time_elapsed > 10000:
             self.state.battle_result = bool(random.getrandbits(1))
             print("state.battle_result: " + str(self.state.battle_result))
             self.battle_done = True
