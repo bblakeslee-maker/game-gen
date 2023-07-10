@@ -9,7 +9,7 @@ QUESTIONS = [
     "Any Additional Info:"
 ]
 
-ENABLE_DEFAULT_ANSWERS = True
+ENABLE_DEFAULT_ANSWERS = False
 DEFAULT_ANSWERS = [
     "Angus McFife",
     "Fighter, Protector of Dundee",
