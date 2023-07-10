@@ -201,6 +201,7 @@ class BattleView(arcade.View):
                         self.current_main_action_index -= 1
                     # Wrap
                     self.current_main_action_index %= len(self.main_actions)
+                    self.current_subaction_index %= len(self.subactions[self.current_main_action])
                 elif self.current_panel == 1:
                     if key == arcade.key.DOWN:
                         self.current_subaction_index += 1
