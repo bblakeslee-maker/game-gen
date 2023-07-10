@@ -105,12 +105,6 @@ class ImageGenerator:
 
         self.image_objects: Dict[str, ImageObject] = {}
         self.negative_prompts = [
-            'bad anatomy',
-            'amputations',
-            'missing head',
-            'body out of frame',
-            'face out of frame',
-            'shirtless',
             'blurry'
             'nudity',
             'sexy',
@@ -258,6 +252,45 @@ class ImageGenerator:
 
         pos_prompt = self.image_objects[name].descriptors
         neg_prompt = self.image_objects[name].negative_prompts
+        neg_prompt += [
+            'bad anatomy',
+            'amputations',
+            'missing head',
+            'body out of frame',
+            'face out of frame',
+            'shirtless',
+            'disfigured',
+            'kitsch',
+            'ugly',
+            'oversaturated',
+            'grain',
+            'low-res',
+            'Deformed',
+            'blurry',
+            'bad anatomy',
+            'disfigured',
+            'poorly drawn face',
+            'mutation',
+            'mutated',
+            'extra limb',
+            'ugly',
+            'poorly drawn hands',
+            'missing limb',
+            'blurry',
+            'floating limbs',
+            'disconnected limbs',
+            'malformed hands',
+            'blur',
+            'out of focus',
+            'long neck',
+            'long body',
+            'ugly',
+            'disgusting',
+            'poorly drawn',
+            'childish',
+            'mutilated',
+            'mangled',
+        ]
 
         pos_prompt = self.portrait_prompts + pos_prompt
 
