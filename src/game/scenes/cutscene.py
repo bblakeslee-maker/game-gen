@@ -83,7 +83,8 @@ class CutsceneView(arcade.View):
         self.dialog_section = dialog_box.DialogBox(0,
                                                    0,
                                                    self.width,
-                                                   self.dialog_height)
+                                                   self.dialog_height,
+                                                   sfx=True)
         self.dialog_section.set_callback(lambda: self.dialog_next())
         # self.dialog_section.char_per_frame = -1
 
