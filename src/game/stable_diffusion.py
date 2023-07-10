@@ -140,8 +140,8 @@ class ImageGenerator:
         for file in POSE_DIR.glob('*jpg'):
             self.poses.append(file)
 
-        # for file in self.cache.glob('*.png'):
-        #     file.unlink()
+        for file in self.cache.glob('*.png'):
+            file.unlink()
 
         requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/options", json=override_settings)
 
