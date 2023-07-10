@@ -225,7 +225,10 @@ class BattleView(arcade.View):
                             accuracy = int(self.player_attacks[self.current_subaction_index]["accuracy"])
 
                         if random.randrange(100) < accuracy:
-                            player_action_text = "Attack hit for " + str(damage) + " damage"
+                            if damage >= 0:
+                                player_action_text = "Attack hit for " + str(damage) + " damage"
+                            else:
+                                player_action_text = "Player healed " + str(abs(damage)) + " HP"
                         else:
                             damage = 0
                             player_action_text = "Player's attack missed..."
@@ -303,12 +306,28 @@ class BattleView(arcade.View):
                     enemy_action_index = random.randint(0, 3)
                     attack_name = self.enemy_attacks[enemy_action_index]["name"]
                     damage = int(self.enemy_attacks[enemy_action_index]["damage"])
-                    if damage > 0:
-                        self.player_health -= damage
-                        boss_action_text = self.state.story_teller.final_boss_name + " attacks with " + attack_name + " for " + str(damage) + " damage"
+                    if isinstance(self.enemy_attacks[enemy_action_index]["accuracy"], str):
+                        accuracy = int(self.enemy_attacks[enemy_action_index]["accuracy"].rstrip('%'))
                     else:
-                        self.boss_health -= damage
-                        boss_action_text = self.state.story_teller.final_boss_name + " heals with " + attack_name + " for " + str(abs(damage)) + "HP"
+                        accuracy = int(self.enemy_attacks[enemy_action_index]["accuracy"])
+
+                        if random.randrange(100) < accuracy:
+                            if damage > 0:
+                                self.player_health -= damage
+                                boss_action_text = self.state.story_teller.final_boss_name + " attacks with " + attack_name + " for " + str(damage) + " damage"
+                            else:
+                                self.boss_health -= damage
+                                boss_action_text = self.state.story_teller.final_boss_name + " heals with " + attack_name + " for " + str(abs(damage)) + "HP"
+                        else:
+                            damage = 0
+                            boss_action_text = self.state.story_teller.final_boss_name + "'s attack missed..."
+
+                    # if damage > 0:
+                    #     self.player_health -= damage
+                    #     boss_action_text = self.state.story_teller.final_boss_name + " attacks with " + attack_name + " for " + str(damage) + " damage"
+                    # else:
+                    #     self.boss_health -= damage
+                    #     boss_action_text = self.state.story_teller.final_boss_name + " heals with " + attack_name + " for " + str(abs(damage)) + "HP"
 
                 print(boss_action_text)
 
