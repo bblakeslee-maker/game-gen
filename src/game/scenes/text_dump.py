@@ -29,7 +29,7 @@ class TextDumpView(arcade.View):
                                                    0,
                                                    self.width,
                                                    100)
-        self.loading_section.open(["Loading..."])
+        self.loading_section.open(["Loading...", "Loading...\t\t\t keep clicking"])
 
         self.loading_section.char_per_frame = -1
 

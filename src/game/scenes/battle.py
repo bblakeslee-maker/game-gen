@@ -211,9 +211,11 @@ class BattleView(arcade.View):
             elif key == arcade.key.LEFT:
                 if self.current_panel == 1:
                     self.current_panel -= 1
+                    self.current_subaction_index %= len(self.subactions[self.current_main_action])
             elif key == arcade.key.RIGHT:
                 if self.current_panel == 0:
                     self.current_panel += 1
+                    self.current_subaction_index %= len(self.subactions[self.current_main_action])
             elif key in (arcade.key.SPACE, arcade.key.ENTER):
                 if self.current_panel == 1:
                     if self.current_main_action_index == 0:
