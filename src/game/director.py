@@ -36,7 +36,6 @@ class Director:
             LoadingController,
             TitleController,
             TextDumpController,
-            LoadingController,
             CutsceneController,
             BattleController,
             CutsceneController,
@@ -135,14 +134,14 @@ class Director:
             music_file = self.state.audio_manager.get_intro_music()
             audio = arcade.load_sound(str(music_file),True)
             self.state.audio_player = arcade.play_sound(audio, MUSIC_VOL, looping=True)
-        elif self.stage_count == 7:
+        elif self.stage_count == 6:
             # play battle music
             arcade.stop_sound(self.state.audio_player)
 
             music_file = self.state.audio_manager.get_battle_music()
             audio = arcade.load_sound(str(music_file),True)
             self.state.audio_player = arcade.play_sound(audio,MUSIC_VOL, looping=True)
-        elif self.stage_count == 8:
+        elif self.stage_count == 7:
             if self.state.battle_won:
                 # play victory music
                 arcade.stop_sound(self.state.audio_player)
@@ -162,7 +161,7 @@ class Director:
             # Wait for the story and images to generate
             self.state.story_generation_future.result()
 
-        if self.stage_count > 7:
+        if self.stage_count > 6:
             # Wait for the final content to generate
             self.state.ending_content_future.result()
 

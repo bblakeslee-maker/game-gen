@@ -7,11 +7,12 @@ SPEECH_SFX = arcade.Sound(Path(__file__).parent / '../../resources/sound/speech3
 from game.drawable import Drawable
 
 class DialogBox(arcade.Section):
-    def __init__(self, left, bottom, width, height, **kwargs):
+    def __init__(self, left, bottom, width, height, sfx=False, **kwargs):
         super().__init__(left, bottom, width, height, **kwargs)
         self.is_open = False
         self.content = []
         self.index = 0
+        self.enable_sfx = sfx
 
         self.background = Drawable(color = arcade.color.BLACK)
         self.left = left
@@ -53,6 +54,10 @@ class DialogBox(arcade.Section):
     def close(self):
         self.is_open = False
 
+    @property
+    def exhausted(self):
+        return self.finished() and self._char_index == len(self.content[self.index])
+
     def on_draw(self):
         start_y = self.bottom + self.height - self.padding - self.font_size
         start_x = self.left + self.padding
@@ -64,7 +69,7 @@ class DialogBox(arcade.Section):
                 self._char_index = len(text)
             else:
                 self._char_index = min(self._char_index + self.char_per_frame, len(text))
-                if self._char_index < len(text) and self._char_index % 6 == 0:
+                if self.enable_sfx and self._char_index < len(text) and self._char_index % 6 == 0:
                     SPEECH_SFX.play(volume=0.5)
 
             arcade.draw_text(text[:self._char_index], start_x, start_y, arcade.color.WHITE, self.font_size, multiline=True, width=self.width - 2 * self.padding)

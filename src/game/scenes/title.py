@@ -41,7 +41,7 @@ class TitleText(arcade.Section):
 
         arcade.draw_text(
                 self.content,
-                0, start_y,
+                self.padding, start_y,
                 arcade.color.WHITE,
                 self.font_size,
                 multiline=True,

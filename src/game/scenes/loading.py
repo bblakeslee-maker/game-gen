@@ -51,10 +51,7 @@ class LoadingView(arcade.View):
         self.time_elapsed = 0
 
     def dialog_next(self):
-        self.dialog_section.next()
-        if self.dialog_section.finished():
-            self.dialog_section.close()
-
+        pass
 
     def on_update(self, delta_time: float):
         self.time_elapsed += delta_time

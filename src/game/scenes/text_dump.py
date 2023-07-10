@@ -17,19 +17,36 @@ class TextDumpView(arcade.View):
         self.dialog_section = dialog_box.DialogBox(0,
                                                    0,
                                                    self.width,
-                                                   self.height)
+                                                   self.height,
+                                                   sfx=False)
         self.dialog_section.set_callback(lambda: self.dialog_next())
-        self.dialog_section.char_per_frame = -1
-
-        self.section_manager.add_section(self.dialog_section)
-
+        self.dialog_section.char_per_frame = 1
         self.dialog_section.open([self.content])
 
+
+        # Add section for loading message
+        self.loading_section = dialog_box.DialogBox(0,
+                                                   0,
+                                                   self.width,
+                                                   100)
+        self.loading_section.open(["Loading..."])
+
+        self.loading_section.char_per_frame = -1
+
+
+        self.section_manager.add_section(self.dialog_section)
+        self.section_manager.add_section(self.loading_section)
+
+
     def dialog_next(self):
-        self.dialog_section.next()
-        if self.dialog_section.finished():
-            self.dialog_section.close()
+        if not self.dialog_section.finished():
+            self.dialog_section.next()
+
+        if self.dialog_section.finished() and \
+                self.state.story_generation_future is not None and \
+                self.state.story_generation_future.done():
             self.done()
+            self.dialog_section.close()
 
     def on_update(self, delta_time: float):
         pass
