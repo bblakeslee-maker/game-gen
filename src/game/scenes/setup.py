@@ -44,7 +44,7 @@ class SetupView(arcade.View):
 
         # Create an entry box
         text = ""
-        if DEFAULT_ANSWERS:
+        if ENABLE_DEFAULT_ANSWERS:
             text = answer
         self.text_area = arcade.gui.UIInputText(text=text,
                                            width=700,
