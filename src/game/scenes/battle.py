@@ -11,7 +11,7 @@ BOSS_SCALING = 0.8
 MENU_HEIGHT = 200
 
 BOSS_MAX_HP = 1000
-PLAYER_MAX_HP = 2400
+PLAYER_MAX_HP = 3000
 
 
 class HPStatusBar:
@@ -243,20 +243,20 @@ class BattleView(arcade.View):
                     print(player_action_text)
                     self.post_action_phase = True
 
-                if damage >= 0:
-                    # Final stand mechanic that's not really working
-                    # if -200 < (self.boss_health - damage) < 0 and self.boss_final_wind_flag == False:
-                    #     self.boss_health = 400
-                    #     boss_final_wind_flag = True
-                    #     print("Final blow wasn't strong enough boss experiances final wind")
-                    # else:
-                    #     self.boss_health -= damage
-                    self.boss_health -= damage
-                else:
-                    self.player_health -= damage
+                    if damage >= 0:
+                        # Final stand mechanic that's not really working
+                        # if -200 < (self.boss_health - damage) < 0 and self.boss_final_wind_flag == False:
+                        #     self.boss_health = 400
+                        #     boss_final_wind_flag = True
+                        #     print("Final blow wasn't strong enough boss experiances final wind")
+                        # else:
+                        #     self.boss_health -= damage
+                        self.boss_health -= damage
+                    else:
+                        self.player_health -= damage
 
-                print("Boss health is currently " + str(self.boss_health))
-                self.players_turn = False
+                    print("Boss health is currently " + str(self.boss_health))
+                    self.players_turn = False
 
 
     @property
