@@ -129,7 +129,9 @@ class StoryTeller:
             {'role': 'system', 'content': self.main_character_description},
             {'role': 'user', 'content': f'Generate a list of four attacks that {self.player_name} uses.  '
                                         f'Format it as a list of JSON objects, where each JSON object '
-                                        f'has "name", "damage", "accuracy", and "description" keys.'
+                                        f'has "name", "damage", "accuracy", and "description" keys. '
+                                        f'has value for the "damage" should be a single integer that is '
+                                        f'positive if it deals damage and negative if it heals. '
                                         f'The value for the "description" key should be five words or less.'}
         ]
         self.main_character_attacks = self.invoke_chatgpt(payload)
