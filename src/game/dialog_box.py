@@ -54,9 +54,8 @@ class DialogBox(arcade.Section):
     def close(self):
         self.is_open = False
 
-    @property
-    def exhausted(self):
-        return self.finished() and self._char_index == len(self.content[self.index])
+    def curr_text_done(self):
+        return self._char_index == len(self.content[self.index])
 
     def on_draw(self):
         start_y = self.bottom + self.height - self.padding - self.font_size

@@ -35,21 +35,24 @@ class TextDumpView(arcade.View):
 
 
         self.section_manager.add_section(self.dialog_section)
-        self.section_manager.add_section(self.loading_section)
+        # self.section_manager.add_section(self.loading_section)
+        self.clicked = False
 
 
     def dialog_next(self):
-        if not self.dialog_section.finished():
-            self.dialog_section.next()
-
-        if self.dialog_section.finished() and \
-                self.state.story_generation_future is not None and \
-                self.state.story_generation_future.done():
-            self.done()
-            self.dialog_section.close()
+        if self.dialog_section.curr_text_done():
+            self.clicked = True
 
     def on_update(self, delta_time: float):
-        pass
+
+        if  self.clicked and \
+            self.state.story_generation_future is not None and \
+            self.state.story_generation_future.done():
+
+            print("text_dump DONE")
+            self.done()
+            self.dialog_section.close()
+            self.loading_section.close()
 
     def on_draw(self):
         arcade.start_render()
