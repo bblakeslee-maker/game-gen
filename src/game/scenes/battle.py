@@ -10,7 +10,7 @@ BOSS_SCALING = 0.8
 
 MENU_HEIGHT = 200
 
-BOSS_MAX_HP = 2300
+BOSS_MAX_HP = 1000
 PLAYER_MAX_HP = 2400
 
 
@@ -61,7 +61,7 @@ class BattleView(arcade.View):
         self.boss_health = BOSS_MAX_HP
         self.player_health = PLAYER_MAX_HP
         self.boss_items_left = 2
-        self.boss_final_wind_flag = False
+        # self.boss_final_wind_flag = False
         self.player_attacks = json.loads(self.state.story_teller.main_character_attacks)
         self.player_items = json.loads(self.state.story_teller.main_character_inventory)
         self.enemy_attacks = json.loads(self.state.story_teller.final_boss_attacks)
@@ -133,7 +133,6 @@ class BattleView(arcade.View):
                 # Draw the border (larger rectangle)
                 arcade.draw_rectangle_outline(panel_x, MENU_HEIGHT / 2, self.width / 3, MENU_HEIGHT, arcade.color.BLACK,
                                             BORDER_THICKNESS)
-                print("current_panel: "+str(self.current_panel)+"i: "+str(i))
                 if self.current_panel == 0 and i != 0:
                     panel_color = arcade.color.DIM_GRAY
                 elif self.current_panel == 1 and i == 0:
@@ -217,16 +216,37 @@ class BattleView(arcade.View):
                     self.current_panel += 1
             elif key in (arcade.key.SPACE, arcade.key.ENTER):
                 if self.current_panel == 1:
-                    damage = int(self.player_attacks[self.current_subaction_index]["damage"])
-                    print("Player attacks with: " + self.current_subaction + " for " + str(damage) + " damage")
+                    if self.current_main_action_index == 0:
+                        damage = int(self.player_attacks[self.current_subaction_index]["damage"])
 
-                if damage > 0:
-                    if -200 < (self.boss_health - damage) < 0 and self.boss_final_wind_flag == False:
-                        self.boss_health = 400
-                        boss_final_wind_flag = True
-                        print("Final blow wasn't strong enough boss experiances final wind")
-                    else:
-                        self.boss_health -= damage
+                        if isinstance(self.player_attacks[self.current_subaction_index]["accuracy"], str):
+                            accuracy = int(self.player_attacks[self.current_subaction_index]["accuracy"].rstrip('%'))
+                        else:
+                            accuracy = int(self.player_attacks[self.current_subaction_index]["accuracy"])
+
+                        if random.randrange(100) < accuracy:
+                            player_action_text = "Attack hit for " + str(damage) + " damage"
+                        else:
+                            damage = 0
+                            player_action_text = "Player's attack missed..."
+
+                    elif self.current_main_action_index == 1:
+                        damage = int(self.player_items[self.current_subaction_index]["damage"])
+                        player_action_text = "Player used item " + self.player_items[self.current_subaction_index]["name"]
+
+                    self.post_action_text = player_action_text
+                    print(player_action_text)
+                    self.post_action_phase = True
+
+                if damage >= 0:
+                    # Final stand mechanic that's not really working
+                    # if -200 < (self.boss_health - damage) < 0 and self.boss_final_wind_flag == False:
+                    #     self.boss_health = 400
+                    #     boss_final_wind_flag = True
+                    #     print("Final blow wasn't strong enough boss experiances final wind")
+                    # else:
+                    #     self.boss_health -= damage
+                    self.boss_health -= damage
                 else:
                     self.player_health -= damage
 
@@ -250,14 +270,16 @@ class BattleView(arcade.View):
         if self.boss_health <= 0:
             self.state.battle_won = True
             self.battle_done = True
-            self.done()
+            self.post_action_text = "You have vanquished " + self.state.story_teller.final_boss_name
 
         if self.post_action_phase == True:
-            # if self.time_in_post_action >= 0.0:
             self.time_in_post_action += delta_time
             if self.time_in_post_action > 1.5:
                 self.time_in_post_action = 0
                 self.post_action_phase = False
+                if self.battle_done:
+                    self.done()
+
         else:
             # Boss's Turn
             if self.players_turn == False:
@@ -274,7 +296,7 @@ class BattleView(arcade.View):
                         boss_action_text = self.state.story_teller.final_boss_name + " attacks with item " + item_name + " for " + str(damage) + " damage"
                     else:
                         self.boss_health -= damage
-                        boss_action_text = self.state.story_teller.final_boss_name + " heals with item " + item_name + " for " + str(damage) + " HP"
+                        boss_action_text = self.state.story_teller.final_boss_name + " heals with item " + item_name + " for " + str(abs(damage)) + " HP"
                     self.boss_items_left -= 1
                 else:
                     # Randomly pick an attack
@@ -286,7 +308,7 @@ class BattleView(arcade.View):
                         boss_action_text = self.state.story_teller.final_boss_name + " attacks with " + attack_name + " for " + str(damage) + " damage"
                     else:
                         self.boss_health -= damage
-                        boss_action_text = self.state.story_teller.final_boss_name + " heals with " + attack_name + " for " + str(damage) + "HP"
+                        boss_action_text = self.state.story_teller.final_boss_name + " heals with " + attack_name + " for " + str(abs(damage)) + "HP"
 
                 print(boss_action_text)
 
@@ -295,10 +317,10 @@ class BattleView(arcade.View):
                 self.players_turn = True
 
         if self.player_health <= 0:
-
             self.state.battle_won = False
             self.battle_done = True
-            self.done()
+            self.post_action_text = "YOU HAVE BEEN DEFEATED"
+
 
 
 
