@@ -11,7 +11,7 @@ BOSS_SCALING = 0.8
 MENU_HEIGHT = 200
 
 BOSS_MAX_HP = 500
-PLAYER_MAX_HP = 1000
+PLAYER_MAX_HP = 800
 
 def try_parse_number(num):
     try:
