@@ -98,12 +98,11 @@ class Director:
                 prologue_prompt = self.state.story_teller.prologue_card_prompt
                 self.state.image_generator.create_background('prologue', prologue_prompt)
 
-                self.state.story_teller.create_battle_card_prompt()
                 print('create_background battle')
+                self.state.story_teller.create_battle_card_prompt()
                 background_prompt = self.state.story_teller.battle_card_prompt
                 self.state.image_generator.create_background('battle', background_prompt)
 
-                # TODO: move to end content
 
 
             self.state.story_generation_future = self.executor.submit(content_in_the_background)

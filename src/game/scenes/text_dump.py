@@ -42,6 +42,7 @@ class TextDumpView(arcade.View):
     def dialog_next(self):
         if self.dialog_section.curr_text_done():
             self.clicked = True
+            self.section_manager.add_section(self.loading_section)
 
     def on_update(self, delta_time: float):
 

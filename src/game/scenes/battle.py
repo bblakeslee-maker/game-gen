@@ -62,25 +62,17 @@ class BattleView(arcade.View):
         self.player_health = PLAYER_MAX_HP
         self.boss_items_left = 2
         # self.boss_final_wind_flag = False
-        self.player_attacks = json.loads(self.state.story_teller.main_character_attacks)
-        self.player_items = json.loads(self.state.story_teller.main_character_inventory)
-        self.enemy_attacks = json.loads(self.state.story_teller.final_boss_attacks)
-        self.enemy_items = json.loads(self.state.story_teller.final_boss_inventory)
+        self.player_attacks = self.state.story_teller.main_character_attacks
+        self.player_items = self.state.story_teller.main_character_inventory
+        self.enemy_attacks = self.state.story_teller.final_boss_attacks
+        self.enemy_items = self.state.story_teller.final_boss_inventory
         self.main_actions = ["Attack", "Item"]
         self.subactions = {
-            "Attack": [self.player_attacks[0]["name"], self.player_attacks[1]["name"], self.player_attacks[2]["name"], self.player_attacks[3]["name"]],
-            "Item": [self.player_items[0]["name"], self.player_items[1]["name"]],
-            # "Act": ["Run", "Bribe", "Giddy Up"],
+            "Attack": [x["name"] for x in self.player_attacks],
+            "Item": [x["name"] for x in self.player_items]
         }
         self.actions_descriptions = {
-            self.player_attacks[0]["name"]: self.player_attacks[0]["description"],
-            self.player_attacks[1]["name"]: self.player_attacks[1]["description"],
-            self.player_attacks[2]["name"]: self.player_attacks[2]["description"],
-            self.player_attacks[3]["name"]: self.player_attacks[3]["description"],
-            self.player_items[0]["name"]: self.player_items[0]["description"],
-            self.player_items[1]["name"]: self.player_items[1]["description"],
-
-            # "Run": "Run away from the battle.",
+            x["name"]: x["description"] for x in self.player_attacks + self.player_items
         }
 
         self.player_hp_bar = HPStatusBar(
@@ -139,7 +131,7 @@ class BattleView(arcade.View):
                     panel_color = arcade.color.DIM_GRAY
                 else:
                     panel_color = arcade.color.WHITE
-                self.current_subaction_index 
+
                 # Draw the panel (smaller rectangle)
                 arcade.draw_rectangle_filled(panel_x, MENU_HEIGHT / 2, self.width / 3 - BORDER_THICKNESS,
                                             MENU_HEIGHT - BORDER_THICKNESS, panel_color)
@@ -161,14 +153,17 @@ class BattleView(arcade.View):
                 action_effect_text = ""
                 accuracy_text = ""
 
+                action_effect = 0
                 if self.current_main_action_index == 0:
                     action_effect = int(self.player_attacks[self.current_subaction_index]["damage"])
                     action_accuracy = str(self.player_attacks[self.current_subaction_index]["accuracy"])
-                    accuracy_text += "Accuraracy: " + action_accuracy + "%"
+                    accuracy_text += "Accuracy: " + action_accuracy + "%"
                 elif self.current_main_action_index == 1:
                     action_effect = int(self.player_items[self.current_subaction_index]["damage"])
-                
-                if action_effect > 0: 
+
+                if action_effect == 0:
+                    action_effect_text += "has no effect..."
+                elif action_effect > 0:
                     action_effect_text += "Deals: " + str(action_effect) +  " Damage"
                 else:
                     action_effect_text += "Heals: " + str(abs(action_effect)) +  "HP"
@@ -294,9 +289,9 @@ class BattleView(arcade.View):
                     
                 if self.boss_items_left > 0 and random.randrange(100) < 30: # Should boss use item
                      # Randomly pick an item
-                    enemy_action_index = random.randint(0, 1)
-                    item_name = self.enemy_attacks[enemy_action_index]["name"]
-                    damage = int(self.enemy_items[enemy_action_index]["damage"])
+                    enemy_item = random.choice(self.enemy_items)
+                    item_name = enemy_item["name"]
+                    damage = int(enemy_item["damage"])
                     if damage > 0:
                         self.player_health -= damage
                         boss_action_text = self.state.story_teller.final_boss_name + " attacks with item " + item_name + " for " + str(damage) + " damage"
@@ -306,13 +301,13 @@ class BattleView(arcade.View):
                     self.boss_items_left -= 1
                 else:
                     # Randomly pick an attack
-                    enemy_action_index = random.randint(0, 3)
-                    attack_name = self.enemy_attacks[enemy_action_index]["name"]
-                    damage = int(self.enemy_attacks[enemy_action_index]["damage"])
-                    if isinstance(self.enemy_attacks[enemy_action_index]["accuracy"], str):
-                        accuracy = int(self.enemy_attacks[enemy_action_index]["accuracy"].rstrip('%'))
+                    enemy_attack = random.choice(self.enemy_attacks)
+                    attack_name = enemy_attack["name"]
+                    damage = int(enemy_attack["damage"])
+                    if isinstance(enemy_attack["accuracy"], str):
+                        accuracy = int(enemy_attack["accuracy"].rstrip('%'))
                     else:
-                        accuracy = int(self.enemy_attacks[enemy_action_index]["accuracy"])
+                        accuracy = int(enemy_attack["accuracy"])
 
                         if random.randrange(100) < accuracy:
                             if damage > 0:

@@ -3,14 +3,63 @@
 import argparse
 import dotenv
 import os
+import json
 import openai
-
 from .utils import persistent_cache
 
 dotenv.load_dotenv()
 
 STORY_CACHE = 'cache.pkl'
 
+
+def retry(times, exceptions):
+    """
+    From: https://stackoverflow.com/questions/50246304/using-python-decorators-to-retry-request
+    Retry Decorator
+    Retries the wrapped function/method `times` times if the exceptions listed
+    in ``exceptions`` are thrown
+    :param times: The number of times to repeat the wrapped function/method
+    :type times: Int
+    :param Exceptions: Lists of exceptions that trigger a retry attempt
+    :type Exceptions: Tuple of Exceptions
+    """
+    def decorator(func):
+        def newfn(*args, **kwargs):
+            attempt = 0
+            while attempt < times:
+                try:
+                    return func(*args, **kwargs)
+                except exceptions:
+                    print(
+                        'Exception thrown when attempting to run %s, attempt '
+                        '%d of %d' % (func, attempt, times)
+                    )
+                    attempt += 1
+            return func(*args, **kwargs)
+        return newfn
+    return decorator
+
+
+def extract_json(text):
+    # Find the first occurrence of a JSON object in the text
+    # print("Extracting JSON from text", text)
+    # start = text.find('{')
+    # end = text.rfind('}')
+    # if start == -1 or end == -1:
+    #     print("NO JSONN!!!!!!")
+    #     return None
+    # json_str = text[start:end+1]
+    #
+    #
+    # print(json_str)
+    json_str = text
+    # Parse the JSON object and return it as a dictionary
+    try:
+        json_dict = json.loads(json_str)
+        return json_dict
+    except json.JSONDecodeError:
+        print("json.JSONDecodeError", json_str)
+        return None
 
 class StoryTeller:
     def __init__(self, use_chatgpt):
@@ -30,6 +79,7 @@ class StoryTeller:
         self.MODEL = 'gpt-3.5-turbo'
 
     @persistent_cache(STORY_CACHE)
+    @retry(3, [openai.error.ServiceUnavailableError])
     def invoke_chatgpt(self, payload):
         response = openai.ChatCompletion.create(model=self.MODEL, messages=payload)
         return response.choices[0].message.content
@@ -40,19 +90,6 @@ class StoryTeller:
         self.player_misc = extra_info
         self.EXTRA_CONTEXT = f'This is extra context about the main character {self.player_name}: "{self.player_misc}"'
 
-    def generate_story(self):
-        self.select_story_genre()
-        self.select_artistic_tone()
-        self.create_prologue()
-        self.create_title()
-        self.create_title_card_prompt()
-        self.create_main_character()
-        self.create_final_boss()
-        self.create_battle_card_prompt()
-        self.create_prologue_dialogue()
-        self.create_endings()
-        self.create_epilogue_dialogue()
-        self.create_story_card_prompts()
 
     def select_story_genre(self):
         payload = [
@@ -134,34 +171,34 @@ class StoryTeller:
                                         f'positive if it deals damage and negative if it heals. '
                                         f'The value for the "description" key should be five words or less.'}
         ]
-        self.main_character_attacks = self.invoke_chatgpt(payload)
+        self.main_character_attacks = extract_json(self.invoke_chatgpt(payload))
         payload = [
             {'role': 'system', 'content': self.main_character_description},
             {'role': 'user', 'content': f'Generate a list of two items that {self.player_name} uses.'
                                         f'Format it as a list of JSON objects, where each JSON object '
                                         f'has "name", "damage", and "description" keys.  One should '
-                                        f'be a healing item, the other should damage the boss.  The '
+                                        f'be a healing item, the other should damage the antagonist.  The '
                                         f'healing item should deal negative damage.  The value for the '
                                         f'"description" key should be five words or less.'}
         ]
-        self.main_character_inventory = self.invoke_chatgpt(payload)
+        self.main_character_inventory = extract_json(self.invoke_chatgpt(payload))
 
     def create_final_boss(self):
         payload = [
             {'role': 'system', 'content': f'The story is "{self.prologue}".  The protagonist of the story is '
                                           f'{self.player_name}, who is {self.main_character_description}.'},
-            {'role': 'user', 'content': f'Describe the appearance of an antagonist that '
+            {'role': 'user', 'content': f'Describe the antagonist that '
                                         f'{self.player_name} the {self.player_job} '
-                                        f'needs to fight in one paragraph.'}
+                                        f'will eventually fight in one paragraph.'}
         ]
         self.final_boss_description = self.invoke_chatgpt(payload)
         payload = [
             {'role': 'system', 'content': self.final_boss_description},
-            {'role': 'user', 'content': 'Generate a name for the final boss.'}
+            {'role': 'user', 'content': 'Generate a name for the antagonist.'}
         ]
         self.final_boss_name = self.invoke_chatgpt(payload)
         payload = [
-            {'role': 'system', 'content': f'The final boss\'s name is '
+            {'role': 'system', 'content': f'The antagonist\'s name is '
                                           f'{self.final_boss_name}.  ' + self.final_boss_description},
             {'role': 'user', 'content': f'Describe this character in five phrases, '
                                         f'each five words or fewer.  ' + self.PROMPT_FORMATTING +
@@ -170,25 +207,25 @@ class StoryTeller:
         temp = self.invoke_chatgpt(payload)
         self.final_boss_prompt = ''.join([i for i in temp if not i.isdigit()]).replace('.', '').replace(')', '')
         payload = [
-            {'role': 'system', 'content': f'The final boss\'s name is '
+            {'role': 'system', 'content': f'The antagonist\'s name is '
                                           f'{self.final_boss_name}.  ' + self.final_boss_description},
-            {'role': 'user', 'content': f'Generate a list of four attacks that the final boss uses.  '
+            {'role': 'user', 'content': f'Generate a list of four attacks that the antagonist uses.  '
                                         f'Format it as a list of JSON objects, where each JSON object '
                                         f'has "name", "damage", "accuracy" and "description" keys.'
                                         f'The value for the "description" key should be five words or less.'}
         ]
-        self.final_boss_attacks = self.invoke_chatgpt(payload)
+        self.final_boss_attacks = extract_json(self.invoke_chatgpt(payload))
         payload = [
-            {'role': 'system', 'content': f'The final boss\'s name is '
+            {'role': 'system', 'content': f'The antagonist\'s name is '
                                           f'{self.final_boss_name}.  ' + self.final_boss_description},
-            {'role': 'user', 'content': f'Generate a list of two items that the boss uses.'
+            {'role': 'user', 'content': f'Generate a list of two items that the antagonist uses.'
                                         f'Format it as a list of JSON objects, where each JSON object '
                                         f'has "name", "damage", and "description" keys.  One should '
                                         f'be a healing item, the other should damage {self.player_name}.  '
                                         f'The healing item should deal negative damage.  The value for the '
                                         f'"description" key should be five words or less.'}
         ]
-        self.final_boss_inventory = self.invoke_chatgpt(payload)
+        self.final_boss_inventory = extract_json(self.invoke_chatgpt(payload))
 
     def create_endings(self):
         payload = [
