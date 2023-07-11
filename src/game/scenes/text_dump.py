@@ -11,7 +11,7 @@ class TextDumpView(arcade.View):
         self.width = state.window_size[0]
         self.height = state.window_size[1]
 
-        self.content = self.state.story_teller.prologue
+        self.content = self.state.story_teller.prologue + "\n\nClick to continue..."
 
         # Add sections for each of the areas:
         self.dialog_section = dialog_box.DialogBox(0,

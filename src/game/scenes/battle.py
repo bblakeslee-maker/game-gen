@@ -10,8 +10,8 @@ BOSS_SCALING = 0.8
 
 MENU_HEIGHT = 200
 
-BOSS_MAX_HP = 1000
-PLAYER_MAX_HP = 3000
+BOSS_MAX_HP = 500
+PLAYER_MAX_HP = 1000
 
 
 class HPStatusBar:
@@ -287,7 +287,7 @@ class BattleView(arcade.View):
 
                 boss_action_text = ""
                     
-                if self.boss_items_left > 0 and random.randrange(100) < 30: # Should boss use item
+                if self.enemy_items and self.boss_items_left > 0 and random.randrange(100) < 30: # Should boss use item
                      # Randomly pick an item
                     enemy_item = random.choice(self.enemy_items)
                     item_name = enemy_item["name"]
@@ -299,9 +299,10 @@ class BattleView(arcade.View):
                         self.boss_health -= damage
                         boss_action_text = self.state.story_teller.final_boss_name + " heals with item " + item_name + " for " + str(abs(damage)) + " HP"
                     self.boss_items_left -= 1
-                else:
+                elif self.enemy_attacks:
                     # Randomly pick an attack
                     enemy_attack = random.choice(self.enemy_attacks)
+                    print("enemy attack", enemy_attack)
                     attack_name = enemy_attack["name"]
                     damage = int(enemy_attack["damage"])
                     if isinstance(enemy_attack["accuracy"], str):
