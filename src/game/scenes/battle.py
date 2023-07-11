@@ -13,6 +13,12 @@ MENU_HEIGHT = 200
 BOSS_MAX_HP = 500
 PLAYER_MAX_HP = 1000
 
+def try_parse_number(num):
+    try:
+        return int(num)
+    except:
+        return 100
+
 
 class HPStatusBar:
     def __init__(self, max_hp, current_hp, x, y, width, height, background_color, foreground_color, border_color):
@@ -304,11 +310,12 @@ class BattleView(arcade.View):
                     enemy_attack = random.choice(self.enemy_attacks)
                     print("enemy attack", enemy_attack)
                     attack_name = enemy_attack["name"]
-                    damage = int(enemy_attack["damage"])
+                    damage = try_parse_number(enemy_attack["damage"])
+
                     if isinstance(enemy_attack["accuracy"], str):
-                        accuracy = int(enemy_attack["accuracy"].rstrip('%'))
+                        accuracy = try_parse_number(enemy_attack["accuracy"].rstrip('%'))
                     else:
-                        accuracy = int(enemy_attack["accuracy"])
+                        accuracy = try_parse_number(enemy_attack["accuracy"])
 
                         if random.randrange(100) < accuracy:
                             if damage > 0:
