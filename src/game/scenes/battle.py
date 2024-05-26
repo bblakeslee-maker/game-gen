@@ -317,16 +317,16 @@ class BattleView(arcade.View):
                     else:
                         accuracy = try_parse_number(enemy_attack["accuracy"])
 
-                        if random.randrange(100) < accuracy:
-                            if damage > 0:
-                                self.player_health -= damage
-                                boss_action_text = self.state.story_teller.final_boss_name + " attacks with " + attack_name + " for " + str(damage) + " damage"
-                            else:
-                                self.boss_health -= damage
-                                boss_action_text = self.state.story_teller.final_boss_name + " heals with " + attack_name + " for " + str(abs(damage)) + "HP"
+                    if random.randrange(100) < accuracy:
+                        if damage > 0:
+                            self.player_health -= damage
+                            boss_action_text = self.state.story_teller.final_boss_name + " attacks with " + attack_name + " for " + str(damage) + " damage"
                         else:
-                            damage = 0
-                            boss_action_text = self.state.story_teller.final_boss_name + "'s attack missed..."
+                            self.boss_health -= damage
+                            boss_action_text = self.state.story_teller.final_boss_name + " heals with " + attack_name + " for " + str(abs(damage)) + "HP"
+                    else:
+                        damage = 0
+                        boss_action_text = self.state.story_teller.final_boss_name + "'s attack missed..."
 
                     # if damage > 0:
                     #     self.player_health -= damage
