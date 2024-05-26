@@ -319,7 +319,7 @@ class ImageGenerator:
                 "controlnet":{
                     "args":[
                         {
-                        "input_image": pose_img,
+                        "image": pose_img,
                         'module': 'openpose',
                         "model": "control_v11p_sd15_openpose [cab727d4]"
                         }
