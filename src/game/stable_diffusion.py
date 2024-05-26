@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import List, Dict
 import cv2
 
-SD_SERVER_IP = '172.30.0.94'
+SD_SERVER_IP = '127.0.0.1'
 
 
 IMAGE_OUT_DIR = Path('/tmp/gamegen_img_cache')
