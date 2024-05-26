@@ -53,6 +53,7 @@ def extract_json(text):
     #
     # print(json_str)
     json_str = text
+    json_str = json_str.replace('```', '').replace('json', '')
     # Parse the JSON object and return it as a dictionary
     try:
         json_dict = json.loads(json_str)
