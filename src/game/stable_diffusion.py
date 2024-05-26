@@ -143,7 +143,8 @@ class ImageGenerator:
         for file in self.cache.glob('*.png'):
             file.unlink()
 
-        requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/options", json=override_settings)
+        # requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/options", json=override_settings)
+        requests.post(url=f"http://{SD_SERVER_IP}:7860/sdapi/v1/options")
 
     def create_character(self, name:str, description:str, no_bg:bool=False, look_right=False):
         descriptors = description.split(',')
